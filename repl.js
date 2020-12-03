@@ -4,7 +4,7 @@ let e = (() => {
 
     const file = process.env.FILE
     const store = file => 'store/' + file + '.json'
-    const out = (file) => 'out/' + file + ext
+    const out = (file, ext) => 'out/' + file + ext
 
     let loaded
     try {
