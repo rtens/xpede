@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="assets/bootstrap.min.css">
+
+    <title>xpede | Goals</title>
+</head>
+
+<body>
+    <div>
+        <div id="dashboard" class="row m-3">
+            <div id="mountain" class="col-12 col-md-4">
+
+                <div class="about card text-white bg-secondary mb-3">
+                    <div class="card-header">
+                        <img src="assets/icons/mountain.png" style="height: 6em" class="float-left mr-3">
+                        <h1 class="name">Mountain Name</h1>
+                        <p class="reason card-title">Reason to climb</p>
+                    </div>
+                </div>
+
+                <div id="goal" class="card text-white bg-secondary mb-1">
+                    <div class="card-header">
+                        <img src="assets/icons/summit.png" style="height: 5em" class="float-left mr-3">
+                        <h2 class="summary">Goal summary</h2>
+                        <p class="description card-title">Goal description</p>
+                    </div>
+                </div>
+
+                <div id="coordinate" class="card text-white mb-1">
+                    <div class="card-header">
+                        <img src="assets/icons/coordinate.png" style="height: 4em" class="float-left mr-3">
+                        <h3 class="summary">Coordinate Summary</h3>
+                        <p class="description">Coordinate description</p>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="value card-title float-right">current value</h5>
+                        <h5 class="dimension card-title">Dimension Summary</h5>
+                        <div class="graph">
+                            <canvas width="100" height="150"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/jquery-3.5.1.slim.min.js"></script>
+
+    <script>
+        const daysAgo = d => new Date(new Date().getTime() - d * 24 * 3600 * 1000).toISOString()
+        const model = /**MODEL*/[{ "name": "Health", "reason": "I want to feel good about myself, be active, have energy and live a long life", "summit": { "summary": "Good shape", "description": "I am in good shape and physically fit", "coordinates": [{ "summary": "One Coordinate", "description": "Some description of the coordinate", "target": { "type": "LocationTarget", "dimension": "Some dimension", "great": 42.1234, "good": 21.4567, "history": [{ "date": daysAgo(35), "score": .1 }, { "date": daysAgo(27), "score": 0.5 }, { "date": daysAgo(20), "score": 1.2 }, { "date": daysAgo(14), "score": 0.9 }, { "date": daysAgo(5), "score": 1.2, "value": 44.3456 }] } }] } }] /*MODEL**/
+
+        const $dashboard = $('#dashboard')
+        const $_mountain = $('#mountain')
+        const $_goal = $('#goal')
+        const $_coordinate = $('#coordinate')
+
+        $_mountain.remove()
+        $_goal.remove()
+        $_coordinate.remove()
+
+        const colorCode = ($element, score) => {
+            if (score >= 1)
+                $element.addClass('bg-success')
+            else if (score <= 0)
+                $element.addClass('bg-danger')
+            else
+                $element.addClass('bg-warning')
+        }
+
+        model.forEach(mountain => {
+            $mountain = $_mountain.clone()
+            $dashboard.append($mountain)
+            $mountain.find('.about .name').html(mountain.name)
+            $mountain.find('.about .reason').html(mountain.reason)
+
+            let worstGoal = 1;
+            [mountain.summit].forEach(goal => {
+                $goal = $_goal.clone()
+                $mountain.append($goal)
+
+                $goal.find('.summary').html(goal.summary)
+                $goal.find('.description').html(goal.description)
+
+                let worst = 1
+                goal.coordinates.forEach(coordinate => {
+                    $coordinate = $_coordinate.clone()
+                    $mountain.append($coordinate)
+
+                    $coordinate.find('.summary').html(coordinate.summary)
+                    $coordinate.find('.description').html(coordinate.description)
+
+                    const current = coordinate.target.history[coordinate.target.history.length - 1]
+                    worst = Math.min(worst, current.score)
+                    colorCode($coordinate, current.score)
+
+                    const $graph = $coordinate.find('.graph')
+
+                    const format = value => Math.round(value * 10) / 10
+
+                    $coordinate.find('.dimension').prop('title', coordinate.target.dimension.description)
+                    $coordinate.find('.dimension').html(coordinate.target.dimension.summary)
+                    $coordinate.find('.value').html(format(current.value))
+
+                    drawHistory(coordinate.target, $graph, { format })
+                })
+
+                colorCode($goal, worst)
+                worstGoal = Math.min(worstGoal, worst)
+            })
+
+            colorCode($mountain.find('.about'), worstGoal)
+        })
+
+        function drawHistory(target, $graph, { format }) {
+
+            const fontSize = 20
+            const padding = fontSize
+            const margin = 5
+            const window = 8 * 7 * 24 * 3600 * 1000
+
+            const now = new Date()
+            const start = new Date(now.getTime() - window)
+            const history = target.history
+
+            const $canvas = $graph.find('canvas')
+            const ctx = $canvas[0].getContext("2d");
+
+            const width = $graph.width() - margin
+            const height = $canvas.prop('height')
+            $canvas.prop('width', width + margin)
+
+            const filtered = target.history.filter(t => t.score > -5 && new Date(t.date) >= start)
+            const max = filtered.reduce((acc, i) => Math.max(acc, i.score), 1)
+            const min = filtered.reduce((acc, i) => Math.min(acc, i.score), 0)
+
+            const dx = width / (now - start)
+            const dy = (height - padding * 2) / (max - min)
+
+            const x = date => (date - start) * dx
+            const y = score => height - (score - min) * dy - padding
+
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = "white";
+
+            const stroke = (x1, y1, x2, y2) => {
+                ctx.beginPath()
+                ctx.moveTo(x(x1), y(y1))
+                ctx.lineTo(x(x2), y(y2))
+                ctx.stroke()
+            }
+
+            stroke(start, 1, now, 1)
+            stroke(start, 0, now, 0)
+
+            for (let w = start.getTime(); w <= now.getTime(); w += 7 * 24 * 3600 * 1000) {
+                stroke(new Date(w), 5 / dy, new Date(w), -5 / dy)
+            }
+
+            ctx.lineWidth = 9;
+            ctx.beginPath();
+            let status = history[0]
+            ctx.moveTo(x(new Date(status.date)), y(status.score));
+
+            for (let i = 1; i < history.length; i++) {
+                status = history[i]
+                ctx.lineTo(x(new Date(status.date)), y(status.score));
+            }
+            ctx.stroke();
+
+            const current = history[history.length - 1]
+
+            const write = (value, x1, y1) => ctx.fillText(format(value), x(x1) - 2, y(y1) + fontSize)
+
+            ctx.font = fontSize + "px Arial"
+            ctx.fillStyle = "white"
+            ctx.textAlign = "right"
+
+            write(target.good, now, 0)
+            write(target.great, now, 1)
+        }
+    </script>
+
+</body>
+
+</html>

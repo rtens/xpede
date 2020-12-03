@@ -1,0 +1,2 @@
+#/bin/sh
+FILE=$1 node -i -e "$(< repl.js)"
