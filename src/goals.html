@@ -58,6 +58,8 @@
         const daysAgo = d => new Date(new Date().getTime() - d * 24 * 3600 * 1000).toISOString()
         const model = /**MODEL*/[{ "name": "Health", "reason": "I want to feel good about myself, be active, have energy and live a long life", "summit": { "summary": "Good shape", "description": "I am in good shape and physically fit", "coordinates": [{ "summary": "One Coordinate", "description": "Some description of the coordinate", "target": { "type": "LocationTarget", "dimension": "Some dimension", "great": 42.1234, "good": 21.4567, "history": [{ "date": daysAgo(35), "score": .1 }, { "date": daysAgo(27), "score": 0.5 }, { "date": daysAgo(20), "score": 1.2 }, { "date": daysAgo(14), "score": 0.9 }, { "date": daysAgo(5), "score": 1.2, "value": 44.3456 }] } }] } }] /*MODEL**/
 
+        setInterval(() => location.reload(true), 5 * 60 * 1000)
+
         const $dashboard = $('#dashboard')
         const $_mountain = $('#mountain')
         const $_goal = $('#goal')

@@ -50,6 +50,8 @@
         const daysAgo = d => new Date(new Date().getTime() - d * 24 * 3600 * 1000).toISOString()
         const model = /**MODEL*/[{ "name": "Foo", "summit": "I am at bar", "indicators": [{ "summary": "One Location", "target": { "type": "LocationTarget", "dimension": "Some dimension", "great": 42.1234, "good": 21.4567, "history": [{ "date": daysAgo(35), "score": .1 }, { "date": daysAgo(27), "score": 0.5 }, { "date": daysAgo(20), "score": 1.2 }, { "date": daysAgo(14), "score": 0.9 }, { "date": daysAgo(5), "score": 1.2, "value": 44.3456 }] } }, { "summary": "One Arrival", "target": { "type": "ArrivalTarget", "dimension": "Bar", "value": 42, "great": "2021-04-01T00:00:00.000Z", "good": "2021-08-01T00:00:00.000Z", "history": [{}, { "date": daysAgo(42), "value": null, "score": null }, { "date": daysAgo(32), "score": 1.3 }, { "date": daysAgo(27), "score": 0.7 }, { "date": daysAgo(22), "score": null }, { "date": daysAgo(20), "score": -.5 }, { "date": daysAgo(10), "score": 1.2 }, { "date": daysAgo(5), "value": "2021-06-01T06:00:00.000Z", "score": 0.7 }] } }] }, { "name": "Bar", "summit": "I am at foo", "indicators": [{ "summary": "Another Location", "target": { "type": "LocationTarget", "dimension": "Another dimension", "great": 7, "good": 21, "history": [{ "date": daysAgo(35), "score": 1.1 }, { "date": daysAgo(27), "score": .2 }, { "date": daysAgo(20), "score": .7 }, { "date": daysAgo(14), "score": 0.9 }, { "date": daysAgo(5), "score": -.2, "value": 18 }] } }] }]/*MODEL**/
 
+        setInterval(() => location.reload(true), 5 * 60 * 1000)
+
         const $dashboard = $('#dashboard')
         const $_mountain = $('#mountain')
         const $_indicator = $('#indicator')
