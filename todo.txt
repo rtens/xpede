@@ -1,2 +1,7 @@
-- changing Targets
-- Units
+- Pull changes of XBerg version
+- Readme with explanations of UI
+- Support very many Mountains and Coordinates/Indicators
+- Unify templates of status and goals dashboards
+- Unify Target types (Arrival and Location)
+- Support changing Targets
+- Use Units to add Measurements and display Locations
