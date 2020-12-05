@@ -387,5 +387,3 @@ class Website extends Source {
 extend(Website, Source)
 
 module.exports = Expedition
-
-// const re = () => {delete require.cache[require.resolve('./expedition.js')]; delete require.cache[require.resolve('./model.js')]; return new (require('./expedition.js'))}
