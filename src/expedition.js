@@ -144,8 +144,8 @@ class Target {
 class LocationTarget extends Target {
     constructor() {
         super()
+        this.ok = Value.of(Number)
         this.good = Value.of(Number)
-        this.great = Value.of(Number)
 
         this.dimension = Reference.to(Dimension)
     }
@@ -154,8 +154,8 @@ class LocationTarget extends Target {
         return {
             type: this.constructor.name,
             dimension: this.dimension.get(d => d.info()),
+            ok: this.ok.get(),
             good: this.good.get(),
-            great: this.great.get(),
             history: this.dimension.get(d => d.locations().all(), () => [])
                 .map(l => this.statusOf(l))
         }
@@ -165,13 +165,13 @@ class LocationTarget extends Target {
         if (!location.exists()) return {}
         location = location.get()
 
+        const ok = this.ok.get()
         const good = this.good.get()
-        const great = this.great.get()
 
         const date = location.at.get()
         const value = location.value.get()
 
-        const score = (value - good) / (great - good)
+        const score = (value - ok) / (good - ok)
 
         return { date, value, score }
     }
@@ -181,8 +181,8 @@ extend(LocationTarget, Target)
 class ArrivalTarget extends Target {
     constructor() {
         super()
+        this.ok = Value.of(Date)
         this.good = Value.of(Date)
-        this.great = Value.of(Date)
 
         this.coordinate = Reference.to(Coordinate)
     }
@@ -197,8 +197,8 @@ class ArrivalTarget extends Target {
             type: this.constructor.name,
             dimension: dimension.info(),
             value: target.good.get(),
+            ok: this.ok.get(),
             good: this.good.get(),
-            great: this.great.get(),
             history: locations.all()
                 .map((l, i) => this.statusOf(locations.at(i - 1), l))
         }
@@ -209,12 +209,12 @@ class ArrivalTarget extends Target {
         first = first.get()
         second = second.get()
 
+        const ok = this.ok.get()
         const good = this.good.get()
-        const great = this.great.get()
 
         const date = second.at.get()
         const value = this.eta(first, second)
-        const score = value ? (value - good) / (great - good) : null
+        const score = value ? (value - ok) / (good - ok) : null
 
         return { date, value, score }
     }

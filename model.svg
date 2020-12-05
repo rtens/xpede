@@ -1219,9 +1219,9 @@
              x="367.19046"
              y="344.68799" /></flowRegion><flowPara
            id="flowPara6311"
-           style="font-size:16px;line-height:150%">good:Number</flowPara><flowPara
+           style="font-size:16px;line-height:150%">ok:Number</flowPara><flowPara
            style="font-size:16px;line-height:150%"
-           id="flowPara6319">great:Number</flowPara></flowRoot>      <path
+           id="flowPara6319">good:Number</flowPara></flowRoot>      <path
          style="fill:none;stroke:#000000;stroke-width:0.30000001;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
          d="m 78.381295,29.761719 36.215025,0"
          id="path6315"
@@ -1268,9 +1268,9 @@
              width="119.53593"
              id="rect6335" /></flowRegion><flowPara
            style="font-size:16px;line-height:150%"
-           id="flowPara6337">good:Date</flowPara><flowPara
+           id="flowPara6337">ok:Date</flowPara><flowPara
            id="flowPara6339"
-           style="font-size:16px;line-height:150%">great:Date</flowPara></flowRoot>      <path
+           style="font-size:16px;line-height:150%">good:Date</flowPara></flowRoot>      <path
          inkscape:connector-curvature="0"
          id="path6343"
          d="m 78.381295,29.761719 36.215025,0"
