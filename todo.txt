@@ -1,4 +1,5 @@
 - Pull changes of XBerg version
+- Move Dimension part of Target
 - Readme with explanations of UI
 - Support very many Mountains and Coordinates/Indicators
 - Unify templates of status and goals dashboards
