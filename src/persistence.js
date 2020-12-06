@@ -137,48 +137,49 @@ Loading.fromFile = filename => Loading.fromString(fs.readFileSync(filename, 'utf
 
 class Registry {
     constructor() {
-        this.objects = []
+        this.registrations = []
+    }
+
+    nextId() {
+        return '@' + (this.registrations.length + 1)
     }
 
     reference(object) {
         if (!object) return null
 
-        const registered = this.objects.find(o => o.object === object)
+        const registered = this.registrations.find(r => r.object === object)
         if (registered) {
             registered.whenReferenced(registered.id)
             return registered.id
         } else {
-            const id = generate()
-            this.objects.push({ object, id })
+            const id = this.nextId()
+            this.registrations.push({ object, id })
             return id
         }
 
     }
 
     register(object, whenReferenced) {
-        const referenced = this.objects.find(o => o.object === object)
+        const referenced = this.registrations.find(r => r.object === object)
         if (referenced) whenReferenced(referenced.id)
-        else this.objects.push({ object, whenReferenced, id: generate() })
+        else this.registrations.push({ object, whenReferenced, id: this.nextId() })
     }
 
     find(id, whenFound) {
-        const found = this.objects.find(o => o.id == id)
+        const found = this.registrations.find(o => o.id == id)
         if (found) whenFound(found.object)
-        else this.objects.push({ id, whenFound })
+        else this.registrations.push({ id, whenFound })
     }
 
     found(id, object) {
-        const looking = this.objects.find(o => o.id == id)
+        const looking = this.registrations.find(o => o.id == id)
         if (looking) looking.whenFound(object)
-        else this.objects.push({ id, object })
+        else this.registrations.push({ id, object })
     }
 }
-
-let generate = () => '@' + Math.round(Math.random() * 100000000)
 
 module.exports = {
     Storing,
     Loading,
-    Dashboard,
-    setGenerator: generator => generate = generator
+    Dashboard
 }

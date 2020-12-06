@@ -1,4 +1,4 @@
-const { Storing, Loading, setGenerator } = require('./persistence')
+const { Storing, Loading } = require('./persistence')
 
 function specify(name, tests) {
     try {
@@ -21,13 +21,9 @@ function equal(actual, expected) {
 }
 
 function same(object, actual, expected) {
-    let id = 1
-    setGenerator(() => '@' + (id++))
-
     const deflated = new Storing(actual).asString()
     equal(JSON.parse(deflated), expected)
 
-    id = 1
     const reDeflated = new Storing(Loading.fromString(deflated).inflated(object)).asString()
     equal({re: JSON.parse(reDeflated)}, {re: expected})
 }
