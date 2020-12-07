@@ -1,28 +1,17 @@
-const { Value, One, Many, Map, Reference, Formula, extend } = require('./model')
+const { Value, One, Many, Map, Reference, Either, Formula, extend } = require('./model')
 
 class Expedition {
     constructor() {
+        this.name = Value.of(String)
         this.mountains = Many.of(Mountain)
     }
 
-    dueMetrics() {
-        return this.mountains.getAll()
-            .reduce((acc, m) => [
-                ...acc,
-                ...m.summit.get().dimensions.getAll()
-                    .filter(d => d instanceof Metric)
-                    .filter(d => d.isDue())
-            ], [])
-    }
-
     status() {
-        return this.mountains.getAll()
-            .map(m => m.status())
-    }
-
-    goals() {
-        return this.mountains.getAll()
-            .map(m => m.goals())
+        return {
+            name: this.name.get(),
+            mountains: this.mountains.getAll()
+                .map(m => m.status())
+        }
     }
 }
 
@@ -31,341 +20,229 @@ class Mountain {
         this.name = Value.of(String)
         this.reason = Value.of(String)
 
-        this.summit = One.of(Goal)
-        this.indicators = Many.of(Indicator)
+        this.goals = Many.of(Goal)
+        this.indicators = Many.of(Either.of(One.of(Indicator), Reference.to(Indicator)))
     }
 
     status() {
         return {
             name: this.name.get(),
-            summit: this.summit.get().description.get(),
-            indicators: this.indicators.getAll()
-                .map(i => i.status())
-        }
-    }
-
-    goals() {
-        return {
-            name: this.name.get(),
             reason: this.reason.get(),
-            summit: this.summit.get().status()
+            indicators: this.indicators.getAll()
+                .map(i => i.get().status())
         }
     }
 }
 
 class Goal {
     constructor() {
-        this.summary = Value.of(String)
+        this.caption = Value.of(String)
         this.description = Value.of(String)
 
-        this.coordinates = Many.of(Coordinate)
-
-        this.dimensions = Many.of(Dimension)
-    }
-
-    status() {
-        return {
-            summary: this.summary.get(),
-            description: this.description.get(),
-            coordinates: this.coordinates.getAll()
-                .map(c => c.status())
-        }
-    }
-}
-
-class Coordinate {
-    constructor() {
-        this.summary = Value.of(String)
-        this.description = Value.of(String)
-        this.targets = Many.of(LocationTarget)
-    }
-
-    status() {
-        return {
-            summary: this.summary.get(),
-            description: this.description.get(),
-            target: this.targets.last().get().status()
-        }
+        this.indicators = Many.of(Indicator)
     }
 }
 
 class Indicator {
-
-    status() {
-        return 'Not implemented for ' + this.constructor.name
-    }
-}
-
-class CoordinateIndicator extends Indicator {
     constructor() {
-        super()
-        this.coordinate = Reference.to(Coordinate)
-    }
-
-    status() {
-        return {
-            type: this.constructor.name,
-            ...this.coordinate.get().status()
-        }
-    }
-}
-extend(CoordinateIndicator, Indicator)
-
-class TargetIndicator extends Indicator {
-    constructor() {
-        super()
-        this.summary = Value.of(String)
+        this.caption = Value.of(String)
         this.description = Value.of(String)
-
-        this.targets = Many.of(Target)
-    }
-
-    status() {
-        return {
-            type: this.constructor.name,
-            summary: this.summary.get(),
-            description: this.description.get(),
-            target: this.targets.last().get().status()
-        }
-    }
-}
-extend(TargetIndicator, Indicator)
-
-class Target {
-    constructor() {
-        this.since = Value.of(Date)
-    }
-
-    status() {
-        return 'Not implemented for ' + this.constructor.name
-    }
-}
-
-class LocationTarget extends Target {
-    constructor() {
-        super()
         this.ok = Value.of(Number)
         this.good = Value.of(Number)
 
-        this.dimension = Reference.to(Dimension)
+        this.metric = One.of(Metric)
     }
 
     status() {
         return {
-            type: this.constructor.name,
-            dimension: this.dimension.get(d => d.info()),
+            caption: this.caption.get(),
+            description: this.description.get(),
             ok: this.ok.get(),
             good: this.good.get(),
-            history: this.dimension.get(d => d.locations().all(), () => [])
-                .map(l => this.statusOf(l))
+            metric: this.metric.ifThere(m => m.info()),
+            status: this.metric.ifEither(
+                m => m.data().getAll().map(d => this.withScore(d)),
+                () => [])
         }
     }
 
-    statusOf(location) {
-        if (!location.exists()) return {}
-        location = location.get()
-
-        const ok = this.ok.get()
-        const good = this.good.get()
-
-        const date = location.at.get()
-        const value = location.value.get()
-
-        const score = (value - ok) / (good - ok)
-
-        return { date, value, score }
-    }
-}
-extend(LocationTarget, Target)
-
-class ArrivalTarget extends Target {
-    constructor() {
-        super()
-        this.ok = Value.of(Date)
-        this.good = Value.of(Date)
-
-        this.coordinate = Reference.to(Coordinate)
-    }
-
-    status() {
-        const coordinate = this.coordinate.get()
-        const target = coordinate.targets.last().get()
-        const dimension = target.dimension.get()
-        const locations = dimension.locations()
-
+    withScore(datum) {
         return {
-            type: this.constructor.name,
-            dimension: dimension.info(),
-            value: target.good.get(),
-            ok: this.ok.get(),
-            good: this.good.get(),
-            history: locations.all()
-                .map((l, i) => this.statusOf(locations.at(i - 1), l))
+            at: datum.at.get(),
+            value: datum.value.get(),
+            score: this.scoreOf(datum.value.get())
         }
     }
 
-    statusOf(first, second) {
-        if (!first.exists() || !second.exists()) return {}
-        first = first.get()
-        second = second.get()
-
+    scoreOf(value) {
         const ok = this.ok.get()
         const good = this.good.get()
 
-        const date = second.at.get()
-        const value = this.eta(first, second)
-        const score = value ? (value - ok) / (good - ok) : null
-
-        return { date, value, score }
-    }
-
-    eta(first, second) {
-        const target = this.coordinate.get().targets.last().get()
-
-        const timeDiff = second.at.get() - first.at.get()
-        const valueDiff = second.value.get() - first.value.get()
-        const valueLeft = target.good.get() - second.value.get()
-
-        const slope = valueDiff / timeDiff
-        const timeLeft = valueLeft / slope
-
-        if (timeLeft < 0) return null
-        return new Date(second.at.get().getTime() + timeLeft)
+        return (value - ok) / (good - ok)
     }
 }
-extend(ArrivalTarget, Target)
 
-class Dimension {
+class Metric {
     constructor() {
-        this.summary = Value.of(String)
+        this.caption = Value.of(String)
         this.description = Value.of(String)
     }
 
     info() {
         return {
-            summary: this.summary.get(),
+            caption: this.caption.get(),
             description: this.description.get()
         }
     }
 
-    locations() {
-        return Many.of(Location)
+    data() {
+        return Many.of(Datum)
     }
 
-    locationOn(date) {
-        return this.locations()
+    datumOn(date) {
+        return this.data()
             .select(l => l.get().at.get() <= date)
             .last()
     }
 
-    locationsBetween(start, end) {
-        return this.locations()
+    dataBetween(start, end) {
+        return this.data()
             .select(l =>
                 l.get().at.get() > start
                 && l.get().at.get() <= end)
     }
-
-    history() {
-        return this.locations().getAll()
-            .reduce((acc, l) => ({
-                ...acc,
-                [l.at.get().toISOString()]: l.value.get()
-            }), {})
-    }
 }
 
-class Derivative extends Dimension {
-    constructor() {
-        super()
-        this.input = Map.of(Reference.to(Dimension))
-        this.formula = Formula.of(Value.of(Number))
-    }
-
-    dates() {
-        const dates = []
-        this.input.values().forEach(d => d.get().locations().getAll()
-            .forEach(l => dates.push(l.at.get())))
-        dates.sort((a, b) => a - b)
-        return dates.filter((e, i) =>
-            dates.map(d => d.toISOString()).indexOf(e.toISOString()) == i)
-    }
-
-    locations() {
-        const locations = Many.of(Location)
-        this.dates().forEach(date => {
-            try {
-                const result = this.formula.result(this.input.all(), date)
-
-                if (!result.exists()) return
-                locations.add().create(l => {
-                    l.at.set(date)
-                    l.value.set(result.get())
-                })
-            } catch { }
-        })
-        return locations
-    }
-}
-extend(Derivative, Dimension)
-
-class Aggregator extends Derivative {
-    constructor() {
-        super()
-        this.start = Value.of(Date)
-        this.frequency = Value.of(Number)
-    }
-
-    dates() {
-        const dates = []
-        let date = this.start.get()
-        while (date < new Date()) {
-            dates.push(date)
-            date = new Date(date.getTime() + this.frequency.get())
-        }
-        return dates
-    }
-}
-extend(Aggregator, Dimension)
-
-class Metric extends Dimension {
+class Measured extends Metric {
     constructor() {
         super()
         this.frequency = Value.of(Number)
         this.source = One.of(Source)
-        this.measurements = Many.of(Measurement)
+        this.facts = Many.of(Datum)
     }
 
-    addMeasurement(value, date) {
-        const m = this.measurements.add().create()
-        m.at.set(date || new Date())
-        m.value.set(value)
+    data() {
+        return this.facts
     }
 
-    locations() {
-        return this.measurements
-    }
-
-    isDue() {
-        if (!this.frequency.exists()) return false
-
-        const last = this.measurements.last()
-        if (!last.exists()) return true
-
-        return new Date(last.get().at.get().getTime() + this.frequency.get()) < new Date()
+    measure(date, value) {
+        this.facts.add().create(d => {
+            d.at.set(date)
+            d.value.set(value)
+        })
     }
 }
-extend(Metric, Dimension)
+extend(Measured, Metric)
 
-class Location {
+class Combined extends Metric {
+    constructor() {
+        super()
+        this.inputs = Map.of(Metric)
+        this.formula = Formula.for(Value.of(Number))
+    }
+
+    data() {
+        const data = Many.of(Datum)
+        this.dates().forEach(date => {
+            try {
+                this.formula.execute(this.inputs.all(), date)
+                    .ifThere(result =>
+                        data.add().create(d => {
+                            d.at.set(date)
+                            d.value.set(result)
+                        }))
+            } catch (e) {
+                console.error('Error while executing formula:' + e)
+            }
+        })
+        return data
+    }
+
+    dates() {
+        const dates = []
+        this.inputs.values().forEach(m => m.get().data().getAll()
+            .forEach(l => dates.push(l.at.get())))
+        dates.sort((a, b) => a - b)
+        const makeUnique = (e, i) => dates.map(d => d.toISOString()).indexOf(e.toISOString()) == i
+        return dates.filter(makeUnique)
+    }
+}
+extend(Combined, Metric)
+
+class Smoothed extends Metric {
+    constructor() {
+        super()
+        this.window = Value.of(Number)
+        this.input = One.of(Metric)
+    }
+
+    data() {
+        const window = this.window.get()
+
+        const data = Many.of(Datum)
+        this.input.get().data().getAll().forEach(datum => {
+            const date = datum.at.get()
+            const start = new Date(date.getTime() - window)
+
+            const acc = this.input.get().dataBetween(start, date).getAll()
+                .reduce((acc, i) =>
+                    ({ sum: atcc.sum + i.value.get(), n: acc.n + 1 }),
+                    { sum: 0, n: 0 })
+
+            data.add().create(d => {
+                d.at.set(date)
+                d.value.set(acc.sum / acc.n)
+            })
+        })
+        return data
+    }
+}
+extend(Smoothed, Metric)
+
+class Chunked extends Metric {
+    constructor() {
+        super()
+        this.start = Value.of(Date)
+        this.size = Value.of(Number)
+        this.input = One.of(Metric)
+    }
+
+    data() {
+        const size = this.size.get()
+        const data = Many.of(Datum)
+        this.dates().forEach(date => {
+            const chunk = this.input.get()
+                .dataBetween(new Date(date.getTime() - size), date)
+            if (chunk.isEmpty()) return
+
+            data.add().create(d => {
+                d.at.set(date)
+                d.value.set(chunk.getAll()
+                    .reduce((acc, i) => acc + i.value.get(), 0))
+            })
+        })
+        return data
+    }
+
+    dates() {
+        const size = this.size.get()
+
+        const lastDate = new Date()
+        const dates = []
+        let date = this.start.get()
+        while (date <= lastDate) {
+            dates.push(date)
+            date = new Date(date.getTime() + size)
+        }
+        return dates
+    }
+}
+extend(Chunked, Metric)
+
+class Datum {
     constructor() {
         this.at = Value.of(Date)
         this.value = Value.of(Number)
-    }
-}
-
-class Measurement extends Location {
-    constructor() {
-        super()
     }
 }
 
@@ -375,8 +252,8 @@ class Source {
     }
 }
 
-class App extends Source { }
-extend(App, Source)
+class External extends Source { }
+extend(External, Source)
 
 class Website extends Source {
     constructor() {

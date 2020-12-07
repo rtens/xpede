@@ -26,7 +26,7 @@ class Storing {
             return undefined
 
         } else if (type == 'Value') {
-            return object.value
+            return object.object
 
         } else if (type == 'One') {
             return object.exists() ? this.deflate(object.object) : null
@@ -41,6 +41,12 @@ class Storing {
 
         } else if (type == 'Reference') {
             return this.registry.reference(object.object)
+
+        } else if (type == 'Either') {
+            return {
+                chosen: object.chosen,
+                object: this.deflate(object.object)
+            }
 
         } else if (type == 'Formula') {
             return object.function.toString()
@@ -57,6 +63,66 @@ class Storing {
         }
     }
 }
+
+class Loading {
+    constructor(deflated) {
+        this.deflated = deflated
+        this.registry = new Registry()
+    }
+
+    inflated(object) {
+        return this.inflate(this.deflated, object)
+    }
+
+    inflate(flat, object) {
+        if (!object) return null
+        const type = object.constructor.name
+
+        if (type == 'Value') {
+            if (flat === null) {
+                object.object = null
+            } else if (object.type.name == 'Date') {
+                object.object = new Date(flat)
+            } else {
+                object.object = flat
+            }
+
+        } else if (type == 'One') {
+            if (flat) object.object = this.inflate(flat, new object.type)
+
+        } else if (type == 'Many') {
+            object.items = flat.map(i => this.inflate(i, object.container.clone()))
+
+        } else if (type == 'Map') {
+            Object.keys(flat).forEach(k =>
+                object.map[k] = this.inflate(flat[k], object.container.clone()))
+
+        } else if (type == 'Reference') {
+            this.registry.find(flat, o => object.object = o)
+
+        } else if (type == 'Either') {
+            object.chosen = flat.chosen
+            if (flat.chosen !== null) object.object = this.inflate(flat.object, object.containers[flat.chosen].clone())
+
+        } else if (type == 'Formula') {
+            object.function = new Function('return ' + flat)()
+
+        } else {
+            if (flat.type != type) {
+                const impl = object.constructor.abstracting.find(a => a.name == flat.type)
+                object = new impl
+            }
+            if (flat.id) this.registry.found(flat.id, object)
+            Object.keys(flat.fields).forEach(k =>
+                object[k] = this.inflate(flat.fields[k], object[k]))
+        }
+
+        return object
+    }
+}
+Loading.fromFlat = flat => new Loading(flat)
+Loading.fromString = string => Loading.fromFlat(JSON.parse(string))
+Loading.fromFile = filename => Loading.fromString(fs.readFileSync(filename, 'utf8'))
 
 class Dashboard {
     constructor(expedition) {
@@ -78,62 +144,6 @@ class Dashboard {
             .replace(/\/\*\*MODEL\*\/.*\/\*MODEL\*\*\//, JSON.stringify(model)))
     }
 }
-
-class Loading {
-    constructor(deflated) {
-        this.deflated = deflated
-        this.registry = new Registry()
-    }
-
-    inflated(object) {
-        return this.inflate(this.deflated, object)
-    }
-
-    inflate(flat, object) {
-        if (!object) return null
-        const type = object.constructor.name
-
-        if (type == 'Value') {
-            if (flat === null) {
-                object.value = null
-            } else if (object.type.name == 'Date') {
-                object.value = new Date(flat)
-            } else {
-                object.value = flat
-            }
-
-        } else if (type == 'One') {
-            if (flat) object.object = this.inflate(flat, new object.type)
-
-        } else if (type == 'Many') {
-            object.items = flat.map(i => this.inflate(i, object.container.clone()))
-
-        } else if (type == 'Map') {
-            Object.keys(flat).forEach(k =>
-                object.map[k] = this.inflate(flat[k], object.container.clone()))
-
-        } else if (type == 'Reference') {
-            this.registry.find(flat, o => object.object = o)
-
-        } else if (type == 'Formula') {
-            object.function = new Function('return ' + flat)()
-
-        } else {
-            if (flat.type != type) {
-                const impl = object.constructor.abstracting.find(a => a.name == flat.type)
-                object = new impl
-            }
-            if (flat.id) this.registry.found(flat.id, object)
-            Object.keys(flat.fields).forEach(k =>
-                object[k] = this.inflate(flat.fields[k], object[k]))
-        }
-
-        return object
-    }
-}
-Loading.fromFlat = flat => new Loading(flat)
-Loading.fromString = string => Loading.fromFlat(JSON.parse(string))
-Loading.fromFile = filename => Loading.fromString(fs.readFileSync(filename, 'utf8'))
 
 class Registry {
     constructor() {

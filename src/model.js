@@ -2,39 +2,67 @@ class Container {
     clone() {
         return new Container()
     }
+
+    description() {
+        return 'Container'
+    }
 }
 
-class Value extends Container {
+class ObjectContainer extends Container {
     constructor(type) {
         super()
         this.type = type
-        this.value = null
-    }
-
-    set(value) {
-        this.value = value
-        return this
-    }
-
-    get() {
-        return this.value
+        this.object = null
     }
 
     exists() {
-        return this.value !== null
+        return this.object !== null
+    }
+
+    ifThere(then) {
+        if (this.exists()) return then(this.object)
+    }
+
+    ifNot(then) {
+        if (!this.exists()) return then()
+    }
+
+    ifEither(there, not) {
+        return this.exists() ? there(this.object) : not()
+    }
+
+    get() {
+        if (!this.exists()) throw new Error('No ' + this.description())
+        return this.object
+    }
+}
+
+class Value extends ObjectContainer {
+    constructor(type) {
+        super(type)
+    }
+
+    set(value) {
+        this.object = value
+    }
+
+    get() {
+        return this.object
     }
 
     clone() {
         return Value.of(this.type)
     }
+
+    description() {
+        return 'Value of ' + this.type.name
+    }
 }
 Value.of = type => new Value(type)
 
-class One extends Container {
+class One extends ObjectContainer {
     constructor(type) {
-        super()
-        this.type = type
-        this.object = null
+        super(type)
 
         const create = t => then => {
             this.object = new t
@@ -50,26 +78,12 @@ class One extends Container {
         }
     }
 
-    exists() {
-        return this.object !== null
-    }
-
-    or(fn) {
-        if (this.exists()) return this
-
-        const backup = this.clone()
-        fn(backup.create())
-        return backup
-    }
-
-    get(ifYes, ifNo = () => null) {
-        if (ifYes) return this.exists() ? ifYes(this.object) : ifNo()
-        if (!this.exists()) throw new Error('No ' + this.type.name)
-        return this.object
-    }
-
     clone() {
         return One.of(this.type)
+    }
+
+    description() {
+        return 'One of ' + this.type.name
     }
 }
 One.of = type => new One(type)
@@ -90,8 +104,8 @@ class Many extends Container {
         return i
     }
 
-    getAll() {
-        return this.all().map(i => i.get())
+    isEmpty() {
+        return this.items.length == 0
     }
 
     all() {
@@ -99,11 +113,11 @@ class Many extends Container {
     }
 
     at(index) {
-        return this.items[index] || this.container
+        return this.items[index] || this.container.clone()
     }
 
     last(index = 0) {
-        return this.items[this.items.length - 1 - index] || this.container
+        return this.items[this.items.length - 1 - index] || this.container.clone()
     }
 
     select(condition) {
@@ -112,24 +126,28 @@ class Many extends Container {
         return subset
     }
 
-    isEmpty() {
-        return this.items.length == 0
+    getAll() {
+        return this.all().map(i => i.get())
     }
 
     clone() {
         return Many.of(this.container)
     }
+
+    description() {
+        return 'Many of ' + this.container.description()
+    }
 }
-Many.of = (container) => new Many(container)
+Many.of = container => new Many(container)
 
 class Map extends Container {
-
     constructor(container) {
         super()
-        this.container = container instanceof Container
-            ? container
-            : One.of(container)
+        this.container = container
         this.map = {}
+
+        if (!(container instanceof Container))
+            this.container = One.of(container)
     }
 
     put(key) {
@@ -139,7 +157,7 @@ class Map extends Container {
     }
 
     at(key) {
-        return this.map[key]
+        return this.map[key] || this.container.clone()
     }
 
     all() {
@@ -153,66 +171,93 @@ class Map extends Container {
     clone() {
         return Map.of(this.container)
     }
-}
-Map.of = (container) => new Map(container)
 
-class Reference extends Container {
+    description() {
+        return 'Map of ' + this.container.description()
+    }
+}
+Map.of = container => new Map(container)
+
+class Reference extends ObjectContainer {
     constructor(type) {
-        super()
-        this.type = type
-        this.object = null
+        super(type)
     }
 
     point(to) {
         this.object = to
-        return this
-    }
-
-    get(ifYes, ifNo = () => null) {
-        if (ifYes) return this.exists() ? ifYes(this.object) : ifNo()
-        if (!this.exists()) throw new Error('No ' + this.type.name)
-        return this.object
-    }
-
-    exists() {
-        return !!this.object
+        return to
     }
 
     clone() {
         return Reference.to(this.type)
     }
+
+    description() {
+        return 'Reference to ' + this.type.name
+    }
 }
 Reference.to = type => new Reference(type)
+
+class Either extends ObjectContainer {
+    constructor(...containers) {
+        super('any')
+        this.containers = containers
+        this.chosen = null
+    }
+
+    options() {
+        return this.containers
+    }
+
+    choose(index) {
+        this.chosen = index
+        this.object = this.containers[index].clone()
+        return this.object
+    }
+
+    clone() {
+        return Either.of(...this.containers)
+    }
+
+    description() {
+        return 'Either of ' + this.containers.map(c => c.description()).join(', ')
+    }
+}
+Either.of = (...containers) => new Either(...containers)
 
 class Formula extends Container {
     constructor(container) {
         super()
-        this.container = container instanceof Container
-            ? container
-            : One.of(container)
-
+        this.container = container
         this.function = () => this.container
+
+        if (!(container instanceof Container))
+            this.container = One.of(container)
     }
 
-    create(fn) {
+    set(fn) {
         this.function = fn
     }
 
-    result(...args) {
+    execute(...args) {
         const result = this.container.clone()
         this.function(result, ...args)
         return result
     }
 
     clone() {
-        return Formula.of(this.container)
+        return Formula.for(this.container)
     }
 
-    print() {
-        console.log(this.function.toString())
+    body() {
+        this.function.toString()
+    }
+
+    description() {
+        return 'Formula of ' + this.container.description()
     }
 }
-Formula.of = container => new Formula(container)
+Formula.for = container => new Formula(container)
 
 function extend(implementation, abstraction) {
     if (!abstraction.abstracting) abstraction.abstracting = []
@@ -226,6 +271,7 @@ module.exports = {
     Many,
     Map,
     Reference,
+    Either,
     Formula,
     extend
 }

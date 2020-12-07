@@ -1,25 +1,42 @@
 const { specify, assert } = require('./spec')
-const { Value, One, Many, Map, Reference, Formula, extend } = require('./model')
+const { Value, One, Many, Map, Reference, Formula, Either, extend } = require('./model')
+
+const a = (a, fn) => fn(a)
 
 specify('Value', () => {
-    assert.equal(Value.of(String).set("foo").get(), "foo")
-    assert.equal(Value.of(String).exists(), false)
-    assert.equal(Value.of(String).set("foo").exists(), true)
+    assert.equal(
+        a(Value.of(String), v =>
+            v.set("foo") ||
+            v.get()),
+        "foo")
+    assert.equal(
+        a(Value.of(String), v =>
+            v.exists()),
+        false)
+    assert.equal(
+        a(Value.of(String), v =>
+            v.set("foo") ||
+            v.exists()),
+        true)
 
     assert.same(Value.of(String),
         Value.of(String),
         null)
     assert.same(Value.of(String),
-        Value.of(String).set("foo"),
+        a(Value.of(String), v =>
+            v.set("foo") || v),
         "foo")
     assert.same(Value.of(String),
-        Value.of(Number).set(42),
+        a(Value.of(Number), v =>
+            v.set(42) || v),
         42)
     assert.same(Value.of(String),
-        Value.of(Boolean).set(true),
+        a(Value.of(Boolean), v =>
+            v.set(true) || v),
         true)
     assert.same(Value.of(String),
-        Value.of(Date).set(new Date('2011-12-13T14:15:16.017Z')),
+        a(Value.of(Date), v =>
+            v.set(new Date('2011-12-13T14:15:16.017Z')) || v),
         '2011-12-13T14:15:16.017Z')
 })
 
@@ -30,11 +47,54 @@ specify('One', () => {
         }
     }
 
-    assert.equal((o => o.create(a => a.foo.set('bar')) && o.get().foo.get())(One.of(A)), "bar")
-    assert.equal((a => a.exists())(One.of(A)), false)
-    assert.equal((a => a.create() && a.exists())(One.of(A)), true)
+    assert.equal(
+        a(One.of(A), o =>
+            o.create(a => a.foo.set('bar')) &&
+            o.get().foo.get()),
+        "bar")
+    assert.equal(
+        a(One.of(A), a =>
+            a.exists()),
+        false)
+    assert.equal(
+        a(One.of(A), a =>
+            a.create() &&
+            a.exists()),
+        true)
 
-    assert.same(One.of(A), One.of(A), null)
+    assert.equal(
+        a(One.of(A), a =>
+            a.ifNot(() => 'foo')),
+        'foo')
+    assert.equal(
+        a(One.of(A), a =>
+            a.create() &&
+            a.ifNot(() => 'foo')),
+        undefined)
+
+    assert.equal(
+        a(One.of(A), a =>
+            a.ifThere(o => o.foo.get())),
+        undefined)
+    assert.equal(
+        a(One.of(A), a =>
+            a.create(o => o.foo.set('bar')) &&
+            a.ifThere(o => o.foo.get())),
+        'bar')
+
+    assert.equal(
+        a(One.of(A), a =>
+            a.ifEither(o => o.foo.get(), () => 'not')),
+        'not')
+    assert.equal(
+        a(One.of(A), a =>
+            a.create(o => o.foo.set('bar')) &&
+            a.ifEither(o => o.foo.get(), () => 'not')),
+        'bar')
+
+    assert.same(One.of(A),
+        One.of(A),
+        null)
     assert.same(One.of(A),
         One.of(A).create(),
         { "type": "A", "fields": { "foo": null } })
@@ -53,19 +113,6 @@ specify('One', () => {
             this.a = One.of(A)
         }
     }
-
-    assert.equal(One.of(HasOne)
-        .or(ho => ho.a.create(a => a.foo.set('bar')))
-        .get().a.get().foo.get(),
-        'bar')
-
-    assert.equal(
-        (o =>
-            o.create(ho => ho.a.create(a => a.foo.set('foo')))
-            && o.or(ho => ho.a.create(a => a.foo.set('bar')))
-        )(One.of(HasOne))
-            .get().a.get().foo.get(),
-        'foo')
 
     assert.same(new HasOne,
         new HasOne,
@@ -86,53 +133,92 @@ specify('One', () => {
 })
 
 specify('Many', () => {
-    class A { }
-
     assert.same(Many.of(Value.of(String)),
         Many.of(Value.of(String)),
         [])
     assert.same(Many.of(Value.of(String)),
-        (m => m.add().set('foo') && m)(Many.of(Value.of(String))),
+        a(Many.of(Value.of(String)), m =>
+            m.add().set('foo') || m),
         ["foo"])
 
     assert.equal(Many.of(Value.of(String)).all(), [])
-    assert.equal(Many.of(Value.of(String)).at(0).get(), null)
+    assert.equal(Many.of(Value.of(String)).at(0), Value.of(String))
 
-    assert.equal((m => m.add().set("foo") && m.add().set("bar") && m.all().map(i => i.get()))(Many.of(Value.of(String))), ["foo", "bar"])
-    assert.equal((m => m.add().set("foo") && m.add().set("bar") && m.getAll())(Many.of(Value.of(String))), ["foo", "bar"])
-    assert.equal((m => m.add().set("foo") && m.add().set("bar") && m.at(0).get())(Many.of(Value.of(String))), "foo")
-    assert.equal((m => m.add().set("foo") && m.add().set("bar") && m.last().get())(Many.of(Value.of(String))), "bar")
-    assert.equal((m => m.add().set("foo") && m.add().set("bar") && m.last(1).get())(Many.of(Value.of(String))), "foo")
+    assert.equal(
+        a(Many.of(Value.of(String)), m =>
+            m.add().set("foo") ||
+            m.add().set("bar") ||
+            m.all().map(i => i.get())),
+        ["foo", "bar"])
+    assert.equal(
+        a(Many.of(Value.of(String)), m =>
+            m.add().set("foo") ||
+            m.add().set("bar") ||
+            m.getAll()),
+        ["foo", "bar"])
+    assert.equal(
+        a(Many.of(Value.of(String)), m =>
+            m.add().set("foo") ||
+            m.add().set("bar") ||
+            m.at(0).get()),
+        "foo")
+    assert.equal(
+        a(Many.of(Value.of(String)), m =>
+            m.add().set("foo") ||
+            m.add().set("bar") ||
+            m.last().get()),
+        "bar")
+    assert.equal(
+        a(Many.of(Value.of(String)), m =>
+            m.add().set("foo") ||
+            m.add().set("bar") ||
+            m.add().set("baz") ||
+            m.last(1).get()),
+        "bar")
 
-    assert.same(Many.of(One.of(A)), Many.of(One.of(A)), [])
+    class A { }
+
     assert.same(Many.of(One.of(A)),
-        (m => m.add() && m)(Many.of(One.of(A))),
+        Many.of(One.of(A)),
+        [])
+    assert.same(Many.of(One.of(A)),
+        a(Many.of(One.of(A)), m =>
+            m.add() && m),
         [null])
     assert.same(Many.of(One.of(A)),
-        (m => m.add().create() && m)(Many.of(One.of(A))),
+        a(Many.of(One.of(A)), m =>
+            m.add().create() && m),
         [{ "type": "A", "fields": {} }])
     assert.same(Many.of(One.of(A)),
-        (m => m.add().create() && m)(Many.of(A)),
+        a(Many.of(A), m =>
+            m.add().create() && m),
         [{ "type": "A", "fields": {} }])
     assert.same(Many.of(One.of(A)),
-        (m => m.add().create() && m.add().create() && m)(Many.of(One.of(A))),
+        a(Many.of(One.of(A)), m =>
+            m.add().create() &&
+            m.add().create() && m),
         [{ "type": "A", "fields": {} }, { "type": "A", "fields": {} }])
 
     assert.same(Many.of(Many.of(One.of(A))),
         Many.of(Many.of(One.of(A))),
         [])
     assert.same(Many.of(Many.of(One.of(A))),
-        (m => m.add() && m)(Many.of(Many.of(One.of(A)))),
+        a(Many.of(Many.of(One.of(A))), m =>
+            m.add() && m),
         [[]])
     assert.same(Many.of(Many.of(One.of(A))),
-        (m => m.add().add().create() && m)(Many.of(Many.of(One.of(A)))),
+        a(Many.of(Many.of(One.of(A))), m =>
+            m.add().add().create() && m),
         [[{ "type": "A", "fields": {} }]])
 })
 
 specify('Map', () => {
-    assert.same(Map.of(Value.of(String)), Map.of(Value.of(String)), {})
     assert.same(Map.of(Value.of(String)),
-        (m => m.put('foo').set(42) && m)(Map.of(Value.of(Number))),
+        Map.of(Value.of(String)),
+        {})
+    assert.same(Map.of(Value.of(String)),
+        a(Map.of(Value.of(Number)), m =>
+            m.put('foo').set(42) || m),
         { foo: 42 })
 })
 
@@ -147,14 +233,17 @@ specify('Reference', () => {
         }
     }
 
-    assert.equal((o =>
-        o.first.create(f => f.foo = 42) &&
-        o.second.point(o.first.get()) &&
-        o.second.get())(new ObjectFirst()),
+    assert.equal(
+        a(new ObjectFirst(), o =>
+            o.first.create(f => f.foo = 42) &&
+            o.second.point(o.first.get()) &&
+            o.second.get()),
         { "foo": 42 })
 
     assert.same(new ObjectFirst,
-        new ObjectFirst(o => o.first.create() && o.second.point(o.first.get())),
+        new ObjectFirst(o =>
+            o.first.create() &&
+            o.second.point(o.first.get())),
         { "type": "ObjectFirst", "fields": { "first": { "id": "@1", "type": "ReferencedObject", "fields": {} }, "second": "@1" } })
 
     class ReferenceFirst {
@@ -204,15 +293,33 @@ specify('Reference', () => {
 })
 
 specify('Formula', () => {
-    const formula = Formula.of(Value.of(String))
+    const formula = Formula.for(Value.of(String))
 
-    assert.equal(formula.result().exists(), false)
+    assert.equal(formula.execute().exists(), false)
 
-    formula.create((result, foo, bar) =>
+    formula.set((result, foo, bar) =>
         result.set(foo.toUpperCase() + bar.toUpperCase()))
 
-    assert.equal(formula.result("foo", "bar").get(), "FOOBAR")
-    assert.roundtrip(Formula.of(Value.of(String)),
-        formula, f => f.result("one", "two").get(),
-        "ONETWO")
+    assert.equal(formula.execute("foo", "bar").get(), "FOOBAR")
+    assert.roundtrip(Formula.for(Value.of(String)),
+        formula, f => f.execute("one", " two").get(),
+        "ONE TWO")
+})
+
+specify('Either', () => {
+    class A { }
+
+    assert.same(Either.of(One.of(A), Value.of(String)),
+        Either.of(One.of(A), Value.of(String)),
+        { "chosen": null, "object": null })
+
+    assert.same(Either.of(One.of(A), Value.of(String)),
+        a(Either.of(One.of(A), Value.of(String)), e =>
+            e.choose(0).create() && e),
+        { "chosen": 0, "object": { "type": "A", "fields": {} } })
+
+    assert.same(Either.of(One.of(A), Value.of(String)),
+        a(Either.of(One.of(A), Value.of(String)), e =>
+            e.choose(1).set('foo') || e),
+        { "chosen": 1, "object": "foo" })
 })

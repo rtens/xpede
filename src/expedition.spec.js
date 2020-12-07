@@ -1,72 +1,155 @@
 const { specify, assert } = require('./spec')
 const Expedition = require('./expedition')
 
-specify('Sum of Metrics', () => {
-    const goal = new Expedition()
-        .mountains.add().create()
-        .summit.create()
+specify('Goals of Expedition', () => {
+    const e = new Expedition()
+    e.name.set('Foo')
 
-    let metric1 = goal.dimensions.add().createMetric()
-    let metric2 = goal.dimensions.add().createMetric()
-
-    const derivative = goal.dimensions.add().createDerivative(d => {
-        d.input.put('one').point(metric1)
-        d.input.put('two').point(metric2)
-
-        d.formula.create((value, { one, two }, date) => {
-            const location = m => m.get().locationOn(date)
-                .get(l => l.value.get(), () => 0)
-
-            value.set(location(one) + location(two))
-        })
+    assert.equal(e.status(), {
+        "name": "Foo",
+        "mountains": []
     })
 
-    metric1.addMeasurement(21, new Date('2011-12-11'))
-    metric2.addMeasurement(12, new Date('2011-12-12'))
-    metric1.addMeasurement(33, new Date('2011-12-13'))
-    metric1.addMeasurement(14, new Date('2011-12-14'))
-    metric2.addMeasurement(25, new Date('2011-12-15'))
+    const m = e.mountains.add().create()
+    m.name.set('Bar')
+    m.reason.set('Because foo')
 
-    assert.equal(derivative.locations().getAll().map(l => [l.at.get(), l.value.get()]), [
-        ['2011-12-11T00:00:00.000Z', 21 + 0],
-        ['2011-12-12T00:00:00.000Z', 21 + 12],
-        ['2011-12-13T00:00:00.000Z', 33 + 12],
-        ['2011-12-14T00:00:00.000Z', 14 + 12],
-        ['2011-12-15T00:00:00.000Z', 14 + 25],
+    assert.equal(e.status().mountains, [
+        {
+            "name": "Bar",
+            "reason": "Because foo",
+            "indicators": []
+        }
+    ])
+
+    const i = m.indicators.add().choose(0).create()
+    i.caption.set('Be Foo')
+    i.description.set('Be a Foo not a Bar')
+    i.ok.set(12)
+    i.good.set(24)
+
+    assert.equal(e.status().mountains[0].indicators, [{
+        "caption": "Be Foo",
+        "description": "Be a Foo not a Bar",
+        "ok": 12,
+        "good": 24,
+        "status": []
+    }])
+
+    const me = i.metric.createMeasured()
+    me.caption.set('A Metric')
+    me.description.set('Some Metric')
+
+    assert.equal(e.status().mountains[0].indicators[0].metric, {
+        "caption": "A Metric",
+        "description": "Some Metric"
+    })
+
+    me.measure(new Date('2020-11-12'), 0)
+    me.measure(new Date('2020-11-13'), 18)
+    me.measure(new Date('2020-11-14'), 30)
+
+    assert.equal(e.status().mountains[0].indicators[0].status, [
+        {
+            "at": "2020-11-12T00:00:00.000Z",
+            "value": 0,
+            "score": -1
+        },
+        {
+            "at": "2020-11-13T00:00:00.000Z",
+            "value": 18,
+            "score": .5
+        },
+        {
+            "at": "2020-11-14T00:00:00.000Z",
+            "value": 30,
+            "score": 1.5
+        }
     ])
 })
 
-specify('Sum of locations', () => {
-    const goal = new Expedition()
-        .mountains.add().create()
-        .summit.create()
-
-    let metric = goal.dimensions.add().createMetric()
-
-    const derivative = goal.dimensions.add().createDerivative(d => {
-        d.summary.set('foo')
-        d.input.put('one').point(metric)
-
-        d.formula.create((value, { one }, date) => {
-            const start = new Date(date - 3 * 24 * 3600 * 1000)
-
-            value.set(
-                one.get().locationsBetween(start, date)
-                    .getAll().reduce((acc, l) => acc + l.value.get(), 0))
+specify('Indicator without thresholds', () => {
+    const e = new Expedition()
+    e.mountains.add().create()
+        .indicators.add().choose(0).create(i => {
+            i.metric.createMeasured(m => {
+                m.measure(new Date('2020-11-12'), 10)
+                m.measure(new Date('2020-11-13'), 3)
+            })
         })
-    })
 
-    metric.addMeasurement(1, new Date('2011-12-11'))
-    metric.addMeasurement(2, new Date('2011-12-12'))
-    metric.addMeasurement(3, new Date('2011-12-13'))
-    metric.addMeasurement(4, new Date('2011-12-14'))
-    metric.addMeasurement(5, new Date('2011-12-15'))
+    assert.equal(e.status().mountains[0].indicators[0].status, [
+        { at: '2020-11-12T00:00:00.000Z', value: 10, score: null },
+        { at: '2020-11-13T00:00:00.000Z', value: 03, score: null }
+    ])
+})
 
-    assert.equal(derivative.locations().getAll().map(l => [l.at.get(), l.value.get()]), [
-        ['2011-12-11T00:00:00.000Z', 1],
-        ['2011-12-12T00:00:00.000Z', 1 + 2],
-        ['2011-12-13T00:00:00.000Z', 1 + 2 + 3],
-        ['2011-12-14T00:00:00.000Z', 2 + 3 + 4],
-        ['2011-12-15T00:00:00.000Z', 3 + 4 + 5],
+specify('Combined Metric', () => {
+    const e = new Expedition()
+    e.mountains.add().create()
+        .indicators.add().choose(0).create(i => {
+            i.good.set(20)
+            i.ok.set(10)
+            i.metric.createCombined(m => {
+                m.formula.set((value, { one, two }, date) => {
+                    value.set(
+                        one.get().datumOn(date).get().value.get()
+                        + two.get().datumOn(date).get().value.get())
+                })
+                m.inputs.put('one').createMeasured(m => {
+                    m.measure(new Date('2020-11-12'), 10)
+                })
+                m.inputs.put('two').createMeasured(m => {
+                    m.measure(new Date('2020-11-12'), 3)
+                    m.measure(new Date('2020-11-13'), 4)
+                })
+            })
+        })
+
+    assert.equal(e.status().mountains[0].indicators[0].status, [
+        { at: '2020-11-12T00:00:00.000Z', value: 13, score: 0.3 },
+        { at: '2020-11-13T00:00:00.000Z', value: 14, score: 0.4 }
+    ])
+})
+
+specify('Smoothed Metric', () => {
+    const e = new Expedition()
+    e.mountains.add().create()
+        .indicators.add().choose(0).create(i => {
+            i.metric.createSmoothed(m => {
+                m.window.set(2 * 24 * 3600 * 1000)
+                m.input.createMeasured(m => {
+                    m.measure(new Date('2020-11-12'), 10)
+                    m.measure(new Date('2020-11-13'), 11)
+                    m.measure(new Date('2020-11-14'), 14)
+                })
+            })
+        })
+
+    assert.equal(e.status().mountains[0].indicators[0].status, [
+        { at: '2020-11-12T00:00:00.000Z', value: 10, score: null },
+        { at: '2020-11-13T00:00:00.000Z', value: 10.5, score: null },
+        { at: '2020-11-14T00:00:00.000Z', value: 12.5, score: null }
+    ])
+})
+
+specify('Chunked Metric', () => {
+    const e = new Expedition()
+    e.mountains.add().create()
+        .indicators.add().choose(0).create(i => {
+            i.metric.createChunked(m => {
+                m.start.set(new Date('2020-11-08'))
+                m.size.set(7 * 24 * 3600 * 1000)
+                m.input.createMeasured(m => {
+                    m.measure(new Date('2020-11-12'), 10)
+                    m.measure(new Date('2020-11-13'), 11)
+                    m.measure(new Date('2020-11-18'), 14)
+                })
+            })
+        })
+
+    assert.equal(e.status().mountains[0].indicators[0].status, [
+        { at: '2020-11-15T00:00:00.000Z', value: 21, score: null },
+        { at: '2020-11-22T00:00:00.000Z', value: 14, score: null },
     ])
 })
