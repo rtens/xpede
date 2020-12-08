@@ -15,13 +15,15 @@ class Expedition {
     }
 
     dueMetrics() {
-        return this.mountains.getAll()
-            .reduce((acc, m) => [...acc, ...m.metrics()], [])
-            .filter(m => m.frequency)
-            .filter(m => {
-                const last = m.data().last()
-                return !last.exists() || last.get().at.get() < new Date(new Date().getTime() - m.frequency.get())
-            })
+        const due = this.mountains.getAll()
+        .reduce((acc, m) => [...acc, ...m.metrics()], [])
+        .filter(m => m.frequency)
+        .filter(m => {
+            const last = m.data().last()
+            return !last.exists() || last.get().at.get() < new Date(new Date().getTime() - m.frequency.get())
+        })
+
+        return due.filter((e, i) => due.map(d => d).indexOf(e) == i)
     }
 }
 
