@@ -129,19 +129,14 @@ class Dashboard {
         this.expedition = expedition
     }
 
-    status(filename) {
-        this._insert('src/status.html', this.expedition.status(), filename)
-    }
-
-    goals(filename) {
-        this._insert('src/goals.html', this.expedition.goals(), filename)
+    generate(filename) {
+        this._insert('src/dashboard.html', this.expedition.status(), filename)
     }
 
     _insert(input, model, output) {
         const template = fs.readFileSync(input, 'utf8')
         fs.writeFileSync(output, template
-            .replace(/assets\//g, "../assets/")
-            .replace(/\/\*\*MODEL\*\/.*\/\*MODEL\*\*\//, JSON.stringify(model)))
+            .replace(/\/\*\*STATUS\*\/.*\/\*STATUS\*\*\//, JSON.stringify(model)))
     }
 }
 

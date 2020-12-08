@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="../assets/bootstrap.min.css">
+
+    <title>xpede</title>
+</head>
+
+<body>
+    <div>
+        <div class="dashboard row m-3">
+            <div class="mountain col" style="min-width: 26em; max-width: 52.5em;">
+
+                <div class="info card text-white bg-secondary mb-3">
+                    <div class="card-header">
+                        <img src="../assets/icons/mountain.png" style="height: 6em" class="icon float-left mr-3">
+                        <h1 class="name">Mountain Name</h1>
+                        <p class="reason card-title">Reason to climb</p>
+                    </div>
+                </div>
+
+                <div class="indicators">
+                    <div class="indicator card text-white bg-secondary mb-3">
+                        <div class="card-header">
+                            <img src="../assets/icons/indicator.png" style="height: 4em" class="icon float-left mr-3">
+                            <h3 class="caption">Indicator caption</h3>
+                            <p class="description">Indicator description</p>
+                        </div>
+                        <div class="card-body">
+                            <h5 class="value card-title float-right">current value</h5>
+                            <h5 class="metric card-title" title="Metric description">Metric caption</h5>
+                            <div class="graph">
+                                <canvas width="100" height="150"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="goals">
+                    <div class="goal card text-white bg-secondary mb-3">
+                        <div class="card-header">
+                            <img src="../assets/icons/summit.png" style="height: 4em" class="icon float-left mr-3">
+                            <h2 class="summary">Goal caption</h2>
+                            <p class="description">Goal description</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="../assets/jquery-3.5.1.slim.min.js"></script>
+
+    <script>
+        const model = /**STATUS*/testStatus()/*STATUS**/
+
+        setInterval(() => location.reload(true), 5 * 60 * 1000)
+
+        const $dashboard = $('.dashboard')
+        const $_goal = $('.goal').remove()
+        const $_indicator = $('.indicator').remove()
+        const $_mountain = $('.mountain').remove()
+
+        document.title = model.name
+
+        const then = []
+        model.mountains.forEach(renderMountain)
+        then.forEach(t => t())
+
+        function renderMountain(mountain) {
+            $mountain = $_mountain.clone()
+            $dashboard.append($mountain)
+            $mountain.find('.info .name').html(mountain.name)
+            $mountain.find('.info .reason').html(mountain.reason)
+
+            const score = mountain.indicators
+                .map(indicator => renderIndicator($mountain, indicator))
+                .reduce((min, score) => Math.min(min, score), Infinity)
+
+            colorCode($mountain.find('.info'), score)
+        }
+
+        function renderIndicator($mountain, indicator) {
+            $indicator = $_indicator.clone()
+            $mountain.find('.indicators').append($indicator)
+
+            $indicator.find('.caption').html(indicator.caption)
+            $indicator.find('.description').html(indicator.description)
+            $indicator.find('.metric').html(indicator.metric.caption)
+            $indicator.find('.metric').prop('title', indicator.metric.description)
+
+            const status = indicator.status[indicator.status.length - 1]
+            colorCode($indicator, status.score || Infinity)
+
+            $indicator.find('.value').html(Math.round(status.value * 10) / 10)
+
+            const $graph = $indicator.find('.graph')
+            then.push(() => drawGraph($graph, indicator))
+
+            return status.score || Infinity
+        }
+
+        function drawGraph($graph, indicator) {
+
+            const fontSize = 20
+            const padding = fontSize
+            const margin = 5
+            const window = 8 * 7 * 24 * 3600 * 1000
+
+            const $canvas = $graph.find('canvas')
+            const ctx = $canvas[0].getContext("2d");
+
+            const width = $graph.width() - margin
+            const height = $canvas.prop('height')
+            $canvas.prop('width', width + margin)
+
+            ctx.strokeStyle = "white";
+            ctx.fillStyle = "white"
+            ctx.font = fontSize + "px Arial"
+            ctx.textAlign = "right"
+
+            const now = new Date()
+            const start = new Date(now.getTime() - window)
+
+            const max = indicator.status.reduce((acc, i) => Math.max(acc, i.value), indicator.good || 0)
+            const min = indicator.status.reduce((acc, i) => Math.min(acc, i.value), indicator.ok || 0)
+
+            const dx = width / (now - start)
+            const dy = (height - padding * 2) / (max - min)
+
+            const x = date => (date - start) * dx
+            const y = value => height - (value - min) * dy - padding
+
+            const write = (value, x1, y1) => ctx.fillText(value, x(x1) - 2, y(y1) + fontSize)
+            const stroke = (x1, y1, x2, y2) => {
+                ctx.beginPath()
+                ctx.moveTo(x(x1), y(y1))
+                ctx.lineTo(x(x2), y(y2))
+                ctx.stroke()
+            }
+
+            const format = i => Math.round(i * 10) / 10
+
+            const low = indicator.ok !== null ? indicator.ok : min
+            const high = indicator.good !== null ? indicator.good : max
+
+            ctx.lineWidth = 3;
+
+            stroke(start, high, now, high)
+            write((indicator.good !== null ? 'good ' : 'max ') + format(high), now, high)
+
+            stroke(start, low, now, low)
+            write((indicator.ok != null ? 'ok ' : 'min ') + format(low), now, low)
+
+            for (let w = start.getTime(); w <= now.getTime(); w += 7 * 24 * 3600 * 1000) {
+                stroke(new Date(w), low + 5 / dy, new Date(w), low - 5 / dy)
+            }
+
+            ctx.lineWidth = 9
+            ctx.beginPath()
+            indicator.status.forEach((status, i) => (i ? ctx.lineTo : ctx.moveTo).call(ctx, x(new Date(status.at)), y(status.value)))
+            ctx.stroke()
+        }
+
+        function colorCode($element, score) {
+            if (score === Infinity) return
+            if (score >= 1) return $element.addClass('bg-success')
+            if (score < 0) return $element.addClass('bg-danger')
+            else return $element.addClass('bg-warning')
+        }
+
+        function testStatus() {
+            function testData(ok, good) {
+                const data = []
+                for (let i = Math.random() * 7; i < Math.random() * 60 + 20; i += Math.random() * 4 + 3) {
+                    const value = Math.random() * 40 - 10
+                    data.unshift({
+                        "at": new Date(new Date().getTime() - i * 24 * 3600 * 1000),
+                        "value": value,
+                        "score": (ok !== null && good !== null) ? (value - ok) / (good - ok) : null
+                    })
+                }
+                return data
+            }
+
+            function testIndicator(parent, name) {
+                const ok = Math.random() > .1 ? Math.random() * 10 : null
+                const good = Math.random() > .1 ? Math.random() * 20 + 10 : null
+
+                return {
+                    "caption": "Be " + name + " with " + parent,
+                    "description": "Be a " + name + " not a foo",
+                    "ok": ok,
+                    "good": good,
+                    "metric": {
+                        "caption": name + " of " + parent + " Metric",
+                        "description": "Some Metric for " + name + " of " + parent
+                    },
+                    "status": testData(ok, good)
+                }
+            }
+
+            function testMountain(name) {
+                return {
+                    "name": name,
+                    "reason": "Because " + name.toLowerCase(),
+                    "indicators": [
+                        testIndicator(name, 'one'),
+                        testIndicator(name, 'two'),
+                        testIndicator(name, 'three'),
+                        testIndicator(name, 'four'),
+                        testIndicator(name, 'five'),
+                    ].slice(0, Math.random() * 4 + 2)
+                }
+            }
+
+            return {
+                "name": "Foo",
+                "mountains": [
+                    testMountain('One'),
+                    testMountain('Two'),
+                    testMountain('Three'),
+                    testMountain('Four'),
+                ]
+            }
+        }
+    </script>
+
+</body>
+
+</html>

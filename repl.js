@@ -15,8 +15,7 @@ let e = (() => {
 
     loaded.save = as => {
         new Storing(e).toFile(store(as || file))
-        new Dashboard(e).status(out(as || file, '_status.html'))
-        new Dashboard(e).goals(out(as || file, '_goals.html'))
+        new Dashboard(e).generate(out(as || file, '.html'))
     }
 
     return loaded
