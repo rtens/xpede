@@ -86,13 +86,17 @@
             $mountain.find('.info .name').html(mountain.name)
             $mountain.find('.info .reason').html(mountain.reason)
 
+            if (mountain.indicators.length === 0) $mountain.find('.indicators').remove()
+
             const score = mountain.indicators
                 .map(indicator => renderIndicator($mountain.find('.indicators'), indicator))
                 .reduce((min, score) => Math.min(min, score), Infinity)
 
-            colorCode($mountain.find('.info'), score)
+            const goals = mountain.goals
+                .map(goal => renderGoal($mountain, goal))
+                .reduce((min, score) => Math.min(min, score), Infinity)
 
-            mountain.goals.forEach(goal => renderGoal($mountain, goal))
+            colorCode($mountain.find('.info'), score < Infinity ? score : goals)
         }
 
         function renderGoal($mountain, goal) {
@@ -102,11 +106,15 @@
             $goal.find('.info .caption').html(goal.caption)
             $goal.find('.info .description').html(goal.description)
 
+            if (goal.criteria.length === 0) $goal.find('.criteria').remove()
+
             const score = goal.criteria
                 .map(indicator => renderIndicator($goal.find('.criteria'), indicator))
                 .reduce((min, score) => Math.min(min, score), Infinity)
 
             colorCode($goal.find('.info'), score)
+
+            return score
         }
 
         function renderIndicator($container, indicator) {
@@ -131,13 +139,15 @@
                 return Infinity
             }
 
-            colorCode($indicator, status.score || Infinity)
+            const score = status.score === null ? Infinity : status.score
+
+            colorCode($indicator, score)
             $indicator.find('.value').html(Math.round(status.value * 100) / 100)
 
             const $graph = $indicator.find('.graph')
             then.push(() => drawGraph($graph, indicator))
 
-            return status.score || Infinity
+            return score
         }
 
         function drawGraph($graph, indicator) {
