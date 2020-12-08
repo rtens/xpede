@@ -13,6 +13,16 @@ class Expedition {
                 .map(m => m.status())
         }
     }
+
+    dueMetrics() {
+        return this.mountains.getAll()
+            .reduce((acc, m) => [...acc, ...m.metrics()], [])
+            .filter(m => m.frequency)
+            .filter(m => {
+                const last = m.data().last()
+                return !last.exists() || last.get().at.get() < new Date(new Date().getTime() - m.frequency.get())
+            })
+    }
 }
 
 class Mountain {
@@ -34,6 +44,13 @@ class Mountain {
                 .map(i => i.get().status())
         }
     }
+
+    metrics() {
+        return [
+            ...this.goals.getAll().reduce((acc, g) => [...acc, ...g.metrics()], []),
+            ...this.indicators.getAll().reduce((acc, i) => [...acc, ...i.get().metrics()], []),
+        ]
+    }
 }
 
 class Goal {
@@ -51,6 +68,10 @@ class Goal {
             criteria: this.criteria.getAll()
                 .map(i => i.status())
         }
+    }
+
+    metrics() {
+        return this.criteria.getAll().reduce((acc, i) => [...acc, ...i.metrics()], [])
     }
 }
 
@@ -91,6 +112,10 @@ class Indicator {
 
         return (value - ok) / (good - ok)
     }
+
+    metrics() {
+        return this.metric.get().get().metrics()
+    }
 }
 
 class Metric {
@@ -121,6 +146,10 @@ class Metric {
             .select(l =>
                 l.get().at.get() > start
                 && l.get().at.get() <= end)
+    }
+
+    metrics() {
+        return [this]
     }
 }
 
@@ -179,6 +208,13 @@ class Combined extends Metric {
         const makeUnique = (e, i) => dates.map(d => d.toISOString()).indexOf(e.toISOString()) == i
         return dates.filter(makeUnique)
     }
+
+    metrics() {
+        return [
+            this,
+            ...this.inputs.values().reduce((acc, i) => [...acc, ...i.get().get().metrics()], [])
+        ]
+    }
 }
 extend(Combined, Metric)
 
@@ -210,6 +246,13 @@ class Smoothed extends Metric {
             })
         })
         return data
+    }
+
+    metrics() {
+        return [
+            this,
+            ...this.input.get().get().metrics()
+        ]
     }
 }
 extend(Smoothed, Metric)
@@ -252,6 +295,13 @@ class Chunked extends Metric {
             date = new Date(date.getTime() + size)
         }
         return dates
+    }
+
+    metrics() {
+        return [
+            this,
+            ...this.input.get().get().metrics()
+        ]
     }
 }
 extend(Chunked, Metric)

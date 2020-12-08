@@ -195,3 +195,38 @@ specify('Chunked Metric', () => {
         { at: '2020-11-22T00:00:00.000Z', value: 14, score: null },
     ])
 })
+
+specify('Due Metrics', () => {
+    const daysAgo = d => new Date(new Date().getTime() - d * 24 * 3600 * 1000)
+
+    const e = new Expedition()
+    const m1 = e.mountains.add().create()
+        .indicators.add().pick(0).create()
+        .metric.pick(0).createMeasured(m => {
+            m.caption.set('One')
+            m.frequency.set(2 * 24 * 3600 * 1000)
+        })
+    e.mountains.add().create()
+        .goals.add().create()
+        .criteria.add().create()
+        .metric.pick(0).createSmoothed()
+        .input.pick(0).createChunked()
+        .input.pick(0).createCombined()
+        .inputs.put('two').pick(0).createMeasured(m => {
+            m.caption.set('Two')
+            m.frequency.set(2 * 24 * 3600 * 1000)
+        })
+
+    assert.equal(e.dueMetrics().map(m => m.caption.get()),
+        ['One', 'Two'])
+
+    m1.measure(daysAgo(3), 1)
+
+    assert.equal(e.dueMetrics().map(m => m.caption.get()),
+        ['One', 'Two'])
+
+    m1.measure(daysAgo(1), 1)
+
+    assert.equal(e.dueMetrics().map(m => m.caption.get()),
+        ['Two'])
+})
