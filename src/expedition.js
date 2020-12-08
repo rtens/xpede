@@ -17,11 +17,7 @@ class Expedition {
     dueMetrics() {
         const due = this.mountains.getAll()
         .reduce((acc, m) => [...acc, ...m.metrics()], [])
-        .filter(m => m.frequency)
-        .filter(m => {
-            const last = m.data().last()
-            return !last.exists() || last.get().at.get() < new Date(new Date().getTime() - m.frequency.get())
-        })
+        .filter(m => m.isDue())
 
         return due.filter((e, i) => due.map(d => d).indexOf(e) === i)
     }
@@ -153,6 +149,10 @@ class Metric {
     metrics() {
         return [this]
     }
+
+    isDue() {
+        return false
+    }
 }
 
 class Measured extends Metric {
@@ -172,6 +172,13 @@ class Measured extends Metric {
             d.at.set(date)
             d.value.set(value)
         })
+    }
+
+    isDue() {
+        if (!this.frequency.exists()) return false
+
+        const last = this.data().last()
+        return !last.exists() || last.get().at.get() < new Date(new Date().getTime() - this.frequency.get())
     }
 }
 extend(Measured, Metric)
