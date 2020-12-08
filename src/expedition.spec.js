@@ -80,6 +80,7 @@ specify('Expedition with Indicators', () => {
     const me = i.metric.pick(0).createMeasured()
     me.caption.set('A Metric')
     me.description.set('Some Metric')
+    me.source.createWebsite(s => s.url.set('example.com'))
 
     assert.equal(e.status().mountains[0].indicators[0].metric, {
         "caption": "A Metric",
@@ -121,7 +122,7 @@ specify('Indicator without thresholds', () => {
 
     assert.equal(e.status().mountains[0].indicators[0].status, [
         { at: '2020-11-12T00:00:00.000Z', value: 10, score: null },
-        { at: '2020-11-13T00:00:00.000Z', value: 03, score: null }
+        { at: '2020-11-13T00:00:00.000Z', value: 3, score: null }
     ])
 })
 
@@ -190,7 +191,7 @@ specify('Chunked Metric', () => {
         })
 
     assert.equal(e.status().mountains[0].indicators[0].status, [
-        { at: '2020-11-08T00:00:00.000Z', value: 00, score: null },
+        { at: '2020-11-08T00:00:00.000Z', value: 0, score: null },
         { at: '2020-11-15T00:00:00.000Z', value: 21, score: null },
         { at: '2020-11-22T00:00:00.000Z', value: 14, score: null },
     ])
@@ -200,6 +201,12 @@ specify('Due Metrics', () => {
     const daysAgo = d => new Date(new Date().getTime() - d * 24 * 3600 * 1000)
 
     const e = new Expedition()
+    e.mountains.add().create()
+        .indicators.add().pick(0).create()
+    e.mountains.add().create()
+        .indicators.add().pick(0).create()
+        .metric.pick(0).createSmoothed()
+
     const m1 = e.mountains.add().create()
         .indicators.add().pick(0).create()
         .metric.pick(0).createMeasured(m => {

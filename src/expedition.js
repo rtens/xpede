@@ -23,7 +23,7 @@ class Expedition {
             return !last.exists() || last.get().at.get() < new Date(new Date().getTime() - m.frequency.get())
         })
 
-        return due.filter((e, i) => due.map(d => d).indexOf(e) == i)
+        return due.filter((e, i) => due.map(d => d).indexOf(e) === i)
     }
 }
 
@@ -116,7 +116,7 @@ class Indicator {
     }
 
     metrics() {
-        return this.metric.get().get().metrics()
+        return this.metric.ifEither(m => m.get().metrics(), () => [])
     }
 }
 
@@ -207,7 +207,7 @@ class Combined extends Metric {
         this.inputs.values().forEach(m => m.get().get().data().getAll()
             .forEach(l => dates.push(l.at.get())))
         dates.sort((a, b) => a - b)
-        const makeUnique = (e, i) => dates.map(d => d.toISOString()).indexOf(e.toISOString()) == i
+        const makeUnique = (e, i) => dates.map(d => d.toISOString()).indexOf(e.toISOString()) === i
         return dates.filter(makeUnique)
     }
 
@@ -253,7 +253,7 @@ class Smoothed extends Metric {
     metrics() {
         return [
             this,
-            ...this.input.get().get().metrics()
+            ...this.input.ifEither(m => m.get().metrics(), () => [])
         ]
     }
 }
@@ -302,7 +302,7 @@ class Chunked extends Metric {
     metrics() {
         return [
             this,
-            ...this.input.get().get().metrics()
+            ...this.input.ifEither(m => m.get().metrics(), () => [])
         ]
     }
 }
