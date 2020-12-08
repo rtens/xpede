@@ -61,7 +61,7 @@ class Indicator {
         this.ok = Value.of(Number)
         this.good = Value.of(Number)
 
-        this.metric = One.of(Metric)
+        this.metric = Either.of(One.of(Metric), Reference.to(Metric))
     }
 
     status() {
@@ -70,9 +70,9 @@ class Indicator {
             description: this.description.get(),
             ok: this.ok.get(),
             good: this.good.get(),
-            metric: this.metric.ifThere(m => m.info()),
+            metric: this.metric.ifThere(m => m.get().info()),
             status: this.metric.ifEither(
-                m => m.data().getAll().map(d => this.withScore(d)),
+                m => m.get().data().getAll().map(d => this.withScore(d)),
                 () => [])
         }
     }
@@ -148,7 +148,7 @@ extend(Measured, Metric)
 class Combined extends Metric {
     constructor() {
         super()
-        this.inputs = Map.of(Metric)
+        this.inputs = Map.of(Either.of(One.of(Metric), Reference.to(Metric)))
         this.formula = Formula.for(Value.of(Number))
     }
 
@@ -156,14 +156,16 @@ class Combined extends Metric {
         const data = Many.of(Datum)
         this.dates().forEach(date => {
             try {
-                this.formula.execute(this.inputs.all(), date)
+                const inputs = {}
+                this.inputs.keys().forEach(k => inputs[k] = this.inputs.at(k).get().get())
+                this.formula.execute(inputs, date)
                     .ifThere(result =>
                         data.add().create(d => {
                             d.at.set(date)
                             d.value.set(result)
                         }))
             } catch (e) {
-                console.error('Error while executing formula:' + e)
+                // console.error('Error in [' + this.caption.get() + '] for [' + date.toISOString() + ']: ' + e)
             }
         })
         return data
@@ -171,7 +173,7 @@ class Combined extends Metric {
 
     dates() {
         const dates = []
-        this.inputs.values().forEach(m => m.get().data().getAll()
+        this.inputs.values().forEach(m => m.get().get().data().getAll()
             .forEach(l => dates.push(l.at.get())))
         dates.sort((a, b) => a - b)
         const makeUnique = (e, i) => dates.map(d => d.toISOString()).indexOf(e.toISOString()) == i
@@ -184,18 +186,20 @@ class Smoothed extends Metric {
     constructor() {
         super()
         this.window = Value.of(Number)
-        this.input = One.of(Metric)
+        this.input = Either.of(One.of(Metric), Reference.to(Metric))
     }
 
     data() {
+        const data = Many.of(Datum)
+        if (!this.input.exists()) return data
+
         const window = this.window.get()
 
-        const data = Many.of(Datum)
-        this.input.get().data().getAll().forEach(datum => {
+        this.input.get().get().data().getAll().forEach(datum => {
             const date = datum.at.get()
             const start = new Date(date.getTime() - window)
 
-            const acc = this.input.get().dataBetween(start, date).getAll()
+            const acc = this.input.get().get().dataBetween(start, date).getAll()
                 .reduce((acc, i) =>
                     ({ sum: acc.sum + i.value.get(), n: acc.n + 1 }),
                     { sum: 0, n: 0 })
@@ -215,16 +219,17 @@ class Chunked extends Metric {
         super()
         this.start = Value.of(Date)
         this.size = Value.of(Number)
-        this.input = One.of(Metric)
+        this.input = Either.of(One.of(Metric), Reference.to(Metric))
     }
 
     data() {
-        const size = this.size.get()
         const data = Many.of(Datum)
+        if (!this.input.exists()) return data
+
+        const size = this.size.get()
         this.dates().forEach(date => {
-            const chunk = this.input.get()
+            const chunk = this.input.get().get()
                 .dataBetween(new Date(date.getTime() - size), date)
-            if (chunk.isEmpty()) return
 
             data.add().create(d => {
                 d.at.set(date)
@@ -238,10 +243,11 @@ class Chunked extends Metric {
     dates() {
         const size = this.size.get()
 
-        const lastDate = new Date()
+        const lastDate = this.input.get().get().data().last().get().at.get()
+        const untilDate = new Date(lastDate.getTime() + size)
         const dates = []
         let date = this.start.get()
-        while (date <= lastDate) {
+        while (date <= untilDate) {
             dates.push(date)
             date = new Date(date.getTime() + size)
         }

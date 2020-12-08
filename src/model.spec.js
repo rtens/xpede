@@ -311,15 +311,15 @@ specify('Either', () => {
 
     assert.same(Either.of(One.of(A), Value.of(String)),
         Either.of(One.of(A), Value.of(String)),
-        { "chosen": null, "object": null })
+        { "picked": null, "object": null })
 
     assert.same(Either.of(One.of(A), Value.of(String)),
         a(Either.of(One.of(A), Value.of(String)), e =>
-            e.choose(0).create() && e),
-        { "chosen": 0, "object": { "type": "A", "fields": {} } })
+            e.pick(0).create() && e),
+        { "picked": 0, "object": { "type": "A", "fields": {} } })
 
     assert.same(Either.of(One.of(A), Value.of(String)),
         a(Either.of(One.of(A), Value.of(String)), e =>
-            e.choose(1).set('foo') || e),
-        { "chosen": 1, "object": "foo" })
+            e.pick(1).set('foo') || e),
+        { "picked": 1, "object": "foo" })
 })

@@ -63,7 +63,7 @@ specify('Expedition with Indicators', () => {
         }
     ])
 
-    const i = m.indicators.add().choose(0).create()
+    const i = m.indicators.add().pick(0).create()
     i.caption.set('Be Foo')
     i.description.set('Be a Foo not a Bar')
     i.ok.set(12)
@@ -77,7 +77,7 @@ specify('Expedition with Indicators', () => {
         "status": []
     }])
 
-    const me = i.metric.createMeasured()
+    const me = i.metric.pick(0).createMeasured()
     me.caption.set('A Metric')
     me.description.set('Some Metric')
 
@@ -112,8 +112,8 @@ specify('Expedition with Indicators', () => {
 specify('Indicator without thresholds', () => {
     const e = new Expedition()
     e.mountains.add().create()
-        .indicators.add().choose(0).create(i => {
-            i.metric.createMeasured(m => {
+        .indicators.add().pick(0).create(i => {
+            i.metric.pick(0).createMeasured(m => {
                 m.measure(new Date('2020-11-12'), 10)
                 m.measure(new Date('2020-11-13'), 3)
             })
@@ -128,19 +128,19 @@ specify('Indicator without thresholds', () => {
 specify('Combined Metric', () => {
     const e = new Expedition()
     e.mountains.add().create()
-        .indicators.add().choose(0).create(i => {
+        .indicators.add().pick(0).create(i => {
             i.good.set(20)
             i.ok.set(10)
-            i.metric.createCombined(m => {
+            i.metric.pick(0).createCombined(m => {
                 m.formula.set((value, { one, two }, date) => {
                     value.set(
-                        one.get().datumOn(date).get().value.get()
-                        + two.get().datumOn(date).get().value.get())
+                        one.datumOn(date).get().value.get()
+                        + two.datumOn(date).get().value.get())
                 })
-                m.inputs.put('one').createMeasured(m => {
+                m.inputs.put('one').pick(0).createMeasured(m => {
                     m.measure(new Date('2020-11-12'), 10)
                 })
-                m.inputs.put('two').createMeasured(m => {
+                m.inputs.put('two').pick(0).createMeasured(m => {
                     m.measure(new Date('2020-11-12'), 3)
                     m.measure(new Date('2020-11-13'), 4)
                 })
@@ -156,10 +156,10 @@ specify('Combined Metric', () => {
 specify('Smoothed Metric', () => {
     const e = new Expedition()
     e.mountains.add().create()
-        .indicators.add().choose(0).create(i => {
-            i.metric.createSmoothed(m => {
+        .indicators.add().pick(0).create(i => {
+            i.metric.pick(0).createSmoothed(m => {
                 m.window.set(2 * 24 * 3600 * 1000)
-                m.input.createMeasured(m => {
+                m.input.pick(0).createMeasured(m => {
                     m.measure(new Date('2020-11-12'), 10)
                     m.measure(new Date('2020-11-13'), 11)
                     m.measure(new Date('2020-11-14'), 14)
@@ -177,11 +177,11 @@ specify('Smoothed Metric', () => {
 specify('Chunked Metric', () => {
     const e = new Expedition()
     e.mountains.add().create()
-        .indicators.add().choose(0).create(i => {
-            i.metric.createChunked(m => {
+        .indicators.add().pick(0).create(i => {
+            i.metric.pick(0).createChunked(m => {
                 m.start.set(new Date('2020-11-08'))
                 m.size.set(7 * 24 * 3600 * 1000)
-                m.input.createMeasured(m => {
+                m.input.pick(0).createMeasured(m => {
                     m.measure(new Date('2020-11-12'), 10)
                     m.measure(new Date('2020-11-13'), 11)
                     m.measure(new Date('2020-11-18'), 14)
@@ -190,6 +190,7 @@ specify('Chunked Metric', () => {
         })
 
     assert.equal(e.status().mountains[0].indicators[0].status, [
+        { at: '2020-11-08T00:00:00.000Z', value: 00, score: null },
         { at: '2020-11-15T00:00:00.000Z', value: 21, score: null },
         { at: '2020-11-22T00:00:00.000Z', value: 14, score: null },
     ])

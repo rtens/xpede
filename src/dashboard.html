@@ -115,13 +115,24 @@
 
             $indicator.find('.caption').html(indicator.caption)
             $indicator.find('.description').html(indicator.description)
+
+            if (!indicator.metric) {
+                $indicator.find('.card-body').remove()
+                return Infinity
+            }
+
             $indicator.find('.metric').html(indicator.metric.caption)
             $indicator.find('.metric').prop('title', indicator.metric.description)
 
             const status = indicator.status[indicator.status.length - 1]
-            colorCode($indicator, status.score || Infinity)
+            if (!status) {
+                $indicator.find('.value').html('')
+                $indicator.find('.graph').html('ok: ' + indicator.ok + '<br>good: ' + indicator.good)
+                return Infinity
+            }
 
-            $indicator.find('.value').html(Math.round(status.value * 10) / 10)
+            colorCode($indicator, status.score || Infinity)
+            $indicator.find('.value').html(Math.round(status.value * 100) / 100)
 
             const $graph = $indicator.find('.graph')
             then.push(() => drawGraph($graph, indicator))
@@ -130,7 +141,6 @@
         }
 
         function drawGraph($graph, indicator) {
-
             const fontSize = 20
             const padding = fontSize
             const margin = 5
@@ -150,16 +160,29 @@
 
             const now = new Date()
             const start = new Date(now.getTime() - window)
+            const inWindow = indicator.status.filter(s => new Date(s.at) >= start)
 
-            const max = indicator.status.reduce((acc, i) => Math.max(acc, i.value), indicator.good || 0)
-            const min = indicator.status.reduce((acc, i) => Math.min(acc, i.value), indicator.ok || 0)
+            const norm = (indicator.ok !== null && indicator.good !== null)
+                ? value => (value - indicator.ok) / (indicator.good - indicator.ok)
+                : value => value
+
+            const max = inWindow.reduce((acc, i) => Math.max(acc, norm(i.value)), 1)
+            const min = inWindow.reduce((acc, i) => Math.min(acc, norm(i.value)), 0)
 
             const dx = width / (now - start)
             const dy = (height - padding * 2) / (max - min)
 
             const x = date => (date - start) * dx
-            const y = value => height - (value - min) * dy - padding
+            const y = normalized => height - padding - (normalized - min) * dy
 
+            ctx.lineWidth = 9
+            ctx.beginPath()
+            indicator.status.forEach((status, i) =>
+                (i ? ctx.lineTo : ctx.moveTo)
+                    .call(ctx, x(new Date(status.at)), y(norm(status.value))))
+            ctx.stroke()
+
+            const format = i => Math.round(i * 10) / 10
             const write = (value, x1, y1) => ctx.fillText(value, x(x1) - 2, y(y1) + fontSize)
             const stroke = (x1, y1, x2, y2) => {
                 ctx.beginPath()
@@ -168,27 +191,27 @@
                 ctx.stroke()
             }
 
-            const format = i => Math.round(i * 10) / 10
-
-            const low = indicator.ok !== null ? indicator.ok : min
-            const high = indicator.good !== null ? indicator.good : max
-
             ctx.lineWidth = 3;
 
-            stroke(start, high, now, high)
-            write((indicator.good !== null ? 'good ' : 'max ') + format(high), now, high)
-
-            stroke(start, low, now, low)
-            write((indicator.ok != null ? 'ok ' : 'min ') + format(low), now, low)
-
-            for (let w = start.getTime(); w <= now.getTime(); w += 7 * 24 * 3600 * 1000) {
-                stroke(new Date(w), low + 5 / dy, new Date(w), low - 5 / dy)
+            if (indicator.good !== null) {
+                stroke(start, 1, now, 1)
+                write('good ' + format(indicator.good), now, 1)
+            } else {
+                stroke(start, max, now, max)
+                write('max ' + format(max), now, max)
             }
 
-            ctx.lineWidth = 9
-            ctx.beginPath()
-            indicator.status.forEach((status, i) => (i ? ctx.lineTo : ctx.moveTo).call(ctx, x(new Date(status.at)), y(status.value)))
-            ctx.stroke()
+            if (indicator.ok !== null) {
+                stroke(start, 0, now, 0)
+                write('ok ' + format(indicator.ok), now, 0)
+
+                for (let w = start.getTime(); w <= now.getTime(); w += 7 * 24 * 3600 * 1000) {
+                    stroke(new Date(w), 5 / dy, new Date(w), -5 / dy)
+                }
+            } else {
+                stroke(start, min, now, min)
+                write('min ' + format(min), now, min)
+            }
         }
 
         function colorCode($element, score) {
@@ -214,7 +237,7 @@
 
             function testIndicator(parent, name) {
                 const ok = Math.random() > .1 ? Math.random() * 10 : null
-                const good = Math.random() > .1 ? Math.random() * 20 + 10 : null
+                const good = Math.random() > .1 ? Math.random() * 20 + 15 : null
 
                 return {
                     "caption": "Be " + name + " with " + parent,

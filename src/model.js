@@ -164,6 +164,10 @@ class Map extends Container {
         return this.map
     }
 
+    keys() {
+        return Object.keys(this.map)
+    }
+
     values() {
         return Object.values(this.map)
     }
@@ -202,15 +206,15 @@ class Either extends ObjectContainer {
     constructor(...containers) {
         super('any')
         this.containers = containers
-        this.chosen = null
+        this.picked = null
     }
 
     options() {
         return this.containers
     }
 
-    choose(index) {
-        this.chosen = index
+    pick(index) {
+        this.picked = index
         this.object = this.containers[index].clone()
         return this.object
     }

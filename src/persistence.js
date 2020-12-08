@@ -44,7 +44,7 @@ class Storing {
 
         } else if (type == 'Either') {
             return {
-                chosen: object.chosen,
+                picked: object.picked,
                 object: this.deflate(object.object)
             }
 
@@ -101,8 +101,8 @@ class Loading {
             this.registry.find(flat, o => object.object = o)
 
         } else if (type == 'Either') {
-            object.chosen = flat.chosen
-            if (flat.chosen !== null) object.object = this.inflate(flat.object, object.containers[flat.chosen].clone())
+            object.picked = flat.picked
+            if (flat.picked !== null) object.object = this.inflate(flat.object, object.containers[flat.picked].clone())
 
         } else if (type == 'Formula') {
             object.function = new Function('return ' + flat)()
