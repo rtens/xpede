@@ -152,7 +152,7 @@
 
         function drawGraph($graph, indicator) {
             const fontSize = 20
-            const padding = fontSize
+            const padding = fontSize * 1.5
             const margin = 5
             const window = 8 * 7 * 24 * 3600 * 1000
 
@@ -193,7 +193,7 @@
             ctx.stroke()
 
             const format = i => Math.round(i * 10) / 10
-            const write = (value, x1, y1) => ctx.fillText(value, x(x1) - 2, y(y1) + fontSize)
+            const write = (value, x1, y1, offset = fontSize) => ctx.fillText(value, x(x1) - 2, y(y1) + offset)
             const stroke = (x1, y1, x2, y2) => {
                 ctx.beginPath()
                 ctx.moveTo(x(x1), y(y1))
@@ -205,10 +205,10 @@
 
             if (indicator.good !== null) {
                 stroke(start, 1, now, 1)
-                write('good ' + format(indicator.good), now, 1)
+                write('good ' + format(indicator.good), now, 1, 10-fontSize)
             } else {
                 stroke(start, max, now, max)
-                write('max ' + format(max), now, max)
+                write('max ' + format(max), now, max, 10-fontSize)
             }
 
             if (indicator.ok !== null) {
