@@ -1,6 +1,46 @@
 const { specify, assert } = require('./spec')
 const Expedition = require('./expedition')
 
+specify('Expedition with Goals', () => {
+    const e = new Expedition()
+    e.name.set('Foo')
+
+    const m = e.mountains.add().create()
+    m.name.set('Bar')
+    m.reason.set('Because foo')
+
+    const g = m.goals.add().create()
+    g.caption.set('Goal one')
+    g.description.set('This is goal one')
+
+    assert.equal(e.status().mountains, [
+        {
+            "name": "Bar",
+            "reason": "Because foo",
+            "goals": [{
+                "caption": "Goal one",
+                "description": "This is goal one",
+                "criteria": []
+            }],
+            "indicators": []
+        }
+    ])
+
+    const i = g.criteria.add().create()
+    i.caption.set('Be Foo')
+    i.description.set('Be a Foo not a Bar')
+    i.ok.set(12)
+    i.good.set(24)
+
+    assert.equal(e.status().mountains[0].goals[0].criteria, [{
+        "caption": "Be Foo",
+        "description": "Be a Foo not a Bar",
+        "ok": 12,
+        "good": 24,
+        "status": []
+    }])
+})
+
 specify('Expedition with Indicators', () => {
     const e = new Expedition()
     e.name.set('Foo')
@@ -18,6 +58,7 @@ specify('Expedition with Indicators', () => {
         {
             "name": "Bar",
             "reason": "Because foo",
+            "goals": [],
             "indicators": []
         }
     ])

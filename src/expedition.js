@@ -28,6 +28,8 @@ class Mountain {
         return {
             name: this.name.get(),
             reason: this.reason.get(),
+            goals: this.goals.getAll()
+                .map(g => g.status()),
             indicators: this.indicators.getAll()
                 .map(i => i.get().status())
         }
@@ -39,7 +41,16 @@ class Goal {
         this.caption = Value.of(String)
         this.description = Value.of(String)
 
-        this.indicators = Many.of(Indicator)
+        this.criteria = Many.of(Indicator)
+    }
+
+    status() {
+        return {
+            caption: this.caption.get(),
+            description: this.description.get(),
+            criteria: this.criteria.getAll()
+                .map(i => i.status())
+        }
     }
 }
 

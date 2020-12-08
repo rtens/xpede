@@ -23,31 +23,37 @@
                         <h1 class="name">Mountain Name</h1>
                         <p class="reason card-title">Reason to climb</p>
                     </div>
-                </div>
 
-                <div class="indicators">
-                    <div class="indicator card text-white bg-secondary mb-3">
-                        <div class="card-header">
-                            <img src="../assets/icons/indicator.png" style="height: 4em" class="icon float-left mr-3">
-                            <h3 class="caption">Indicator caption</h3>
-                            <p class="description">Indicator description</p>
-                        </div>
-                        <div class="card-body">
-                            <h5 class="value card-title float-right">current value</h5>
-                            <h5 class="metric card-title" title="Metric description">Metric caption</h5>
-                            <div class="graph">
-                                <canvas width="100" height="150"></canvas>
+
+                    <div class="indicators card-body">
+                        <div class="indicator card text-white bg-secondary mb-3">
+                            <div class="card-header">
+                                <img src="../assets/icons/indicator.png" style="height: 4em"
+                                    class="icon float-left mr-3">
+                                <h3 class="caption">Indicator caption</h3>
+                                <p class="description">Indicator description</p>
+                            </div>
+                            <div class="card-body">
+                                <h5 class="value card-title float-right">current value</h5>
+                                <h5 class="metric card-title" title="Metric description">Metric caption</h5>
+                                <div class="graph">
+                                    <canvas width="100" height="150"></canvas>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="goals">
-                    <div class="goal card text-white bg-secondary mb-3">
-                        <div class="card-header">
-                            <img src="../assets/icons/summit.png" style="height: 4em" class="icon float-left mr-3">
-                            <h2 class="summary">Goal caption</h2>
-                            <p class="description">Goal description</p>
+                    <div class="goal">
+                        <div class="info card text-white bg-secondary mb-3">
+                            <div class="card-header">
+                                <img src="../assets/icons/summit.png" style="height: 4em" class="icon float-left mr-3">
+                                <h2 class="caption">Goal caption</h2>
+                                <p class="description">Goal description</p>
+                            </div>
+
+                            <div class="criteria card-body"></div>
                         </div>
                     </div>
                 </div>
@@ -81,15 +87,31 @@
             $mountain.find('.info .reason').html(mountain.reason)
 
             const score = mountain.indicators
-                .map(indicator => renderIndicator($mountain, indicator))
+                .map(indicator => renderIndicator($mountain.find('.indicators'), indicator))
                 .reduce((min, score) => Math.min(min, score), Infinity)
 
             colorCode($mountain.find('.info'), score)
+
+            mountain.goals.forEach(goal => renderGoal($mountain, goal))
         }
 
-        function renderIndicator($mountain, indicator) {
+        function renderGoal($mountain, goal) {
+            $goal = $_goal.clone()
+            $mountain.find('.goals').append($goal)
+
+            $goal.find('.info .caption').html(goal.caption)
+            $goal.find('.info .description').html(goal.description)
+
+            const score = goal.criteria
+                .map(indicator => renderIndicator($goal.find('.criteria'), indicator))
+                .reduce((min, score) => Math.min(min, score), Infinity)
+
+            colorCode($goal.find('.info'), score)
+        }
+
+        function renderIndicator($container, indicator) {
             $indicator = $_indicator.clone()
-            $mountain.find('.indicators').append($indicator)
+            $container.append($indicator)
 
             $indicator.find('.caption').html(indicator.caption)
             $indicator.find('.description').html(indicator.description)
@@ -211,6 +233,17 @@
                 return {
                     "name": name,
                     "reason": "Because " + name.toLowerCase(),
+                    "goals": [
+                        {
+                            "caption": "Climb " + name,
+                            "description": "I have climbed on top of " + name,
+                            "criteria": [
+                                testIndicator(name, 'one'),
+                                testIndicator(name, 'two'),
+                                testIndicator(name, 'three'),
+                            ]
+                        }
+                    ],
                     "indicators": [
                         testIndicator(name, 'one'),
                         testIndicator(name, 'two'),
