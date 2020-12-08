@@ -17,7 +17,7 @@
         <div class="dashboard row m-3">
             <div class="mountain col" style="min-width: 26em; max-width: 52.5em;">
 
-                <div class="info card text-white bg-secondary mb-3">
+                <div class="mountain-info card text-white bg-secondary mb-3">
                     <div class="card-header">
                         <img src="../assets/icons/mountain.png" style="height: 6em" class="icon float-left mr-3">
                         <h1 class="name">Mountain Name</h1>
@@ -46,7 +46,7 @@
 
                 <div class="goals">
                     <div class="goal">
-                        <div class="info card text-white bg-secondary mb-3">
+                        <div class="goal-info card text-white bg-secondary mb-3">
                             <div class="card-header">
                                 <img src="../assets/icons/summit.png" style="height: 4em" class="icon float-left mr-3">
                                 <h2 class="caption">Goal caption</h2>
@@ -83,8 +83,8 @@
         function renderMountain(mountain) {
             $mountain = $_mountain.clone()
             $dashboard.append($mountain)
-            $mountain.find('.info .name').html(mountain.name)
-            $mountain.find('.info .reason').html(mountain.reason)
+            $mountain.find('.mountain-info .name').html(mountain.name)
+            $mountain.find('.mountain-info .reason').html(mountain.reason)
 
             if (mountain.indicators.length === 0) $mountain.find('.indicators').remove()
 
@@ -96,15 +96,15 @@
                 .map(goal => renderGoal($mountain, goal))
                 .reduce((min, score) => Math.min(min, score), Infinity)
 
-            colorCode($mountain.find('.info'), score < Infinity ? score : goals)
+            colorCode($mountain.find('.mountain-info'), score < Infinity ? score : goals)
         }
 
         function renderGoal($mountain, goal) {
             $goal = $_goal.clone()
             $mountain.find('.goals').append($goal)
 
-            $goal.find('.info .caption').html(goal.caption)
-            $goal.find('.info .description').html(goal.description)
+            $goal.find('.goal-info .caption').html(goal.caption)
+            $goal.find('.goal-info .description').html(goal.description)
 
             if (goal.criteria.length === 0) $goal.find('.criteria').remove()
 
@@ -112,7 +112,7 @@
                 .map(indicator => renderIndicator($goal.find('.criteria'), indicator))
                 .reduce((min, score) => Math.min(min, score), Infinity)
 
-            colorCode($goal.find('.info'), score)
+            colorCode($goal.find('.goal-info'), score)
 
             return score
         }
@@ -126,7 +126,7 @@
 
             if (!indicator.metric) {
                 $indicator.find('.card-body').remove()
-                return Infinity
+                return -Infinity
             }
 
             $indicator.find('.metric').html(indicator.metric.caption)
@@ -136,10 +136,10 @@
             if (!status) {
                 $indicator.find('.value').html('')
                 $indicator.find('.graph').html('ok: ' + indicator.ok + '<br>good: ' + indicator.good)
-                return Infinity
+                return -Infinity
             }
 
-            const score = status.score === null ? Infinity : status.score
+            const score = status.score === null ? -Infinity : status.score
 
             colorCode($indicator, score)
             $indicator.find('.value').html(Math.round(status.value * 100) / 100)
@@ -225,7 +225,7 @@
         }
 
         function colorCode($element, score) {
-            if (score === Infinity) return
+            if (score === Infinity || score === -Infinity) return
             if (score >= 1) return $element.addClass('bg-success')
             if (score < 0) return $element.addClass('bg-danger')
             else return $element.addClass('bg-warning')
