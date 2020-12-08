@@ -186,7 +186,7 @@ class Smoothed extends Metric {
 
             const acc = this.input.get().dataBetween(start, date).getAll()
                 .reduce((acc, i) =>
-                    ({ sum: atcc.sum + i.value.get(), n: acc.n + 1 }),
+                    ({ sum: acc.sum + i.value.get(), n: acc.n + 1 }),
                     { sum: 0, n: 0 })
 
             data.add().create(d => {

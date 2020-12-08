@@ -1,7 +1,7 @@
 const { specify, assert } = require('./spec')
 const Expedition = require('./expedition')
 
-specify('Goals of Expedition', () => {
+specify('Expedition with Indicators', () => {
     const e = new Expedition()
     e.name.set('Foo')
 
