@@ -176,24 +176,35 @@ specify('Smoothed Metric', () => {
 })
 
 specify('Chunked Metric', () => {
+    const daysAgo = d => new Date(new Date(new Date().getTime() - d * 24 * 3600 * 1000).toISOString().substring(0, 10))
+    let measured
+
     const e = new Expedition()
     e.mountains.add().create()
         .indicators.add().pick(0).create(i => {
             i.metric.pick(0).createChunked(m => {
-                m.start.set(new Date('2020-11-08'))
+                m.start.set(daysAgo(24))
                 m.size.set(7 * 24 * 3600 * 1000)
-                m.input.pick(0).createMeasured(m => {
-                    m.measure(new Date('2020-11-12'), 10)
-                    m.measure(new Date('2020-11-13'), 11)
-                    m.measure(new Date('2020-11-18'), 14)
-                })
+                measured = m.input.pick(0).createMeasured()
             })
         })
 
     assert.equal(e.status().mountains[0].indicators[0].status, [
-        { at: '2020-11-08T00:00:00.000Z', value: 0, score: null },
-        { at: '2020-11-15T00:00:00.000Z', value: 21, score: null },
-        { at: '2020-11-22T00:00:00.000Z', value: 14, score: null },
+        { at: daysAgo(24), value: 0, score: null },
+        { at: daysAgo(17), value: 0, score: null },
+        { at: daysAgo(10), value: 0, score: null },
+        { at: daysAgo(3), value: 0, score: null },
+    ])
+
+    measured.measure(daysAgo(23), 1)
+    measured.measure(daysAgo(17), 2)
+    measured.measure(daysAgo(9), 4)
+
+    assert.equal(e.status().mountains[0].indicators[0].status, [
+        { at: daysAgo(24), value: 0, score: null },
+        { at: daysAgo(17), value: 3, score: null },
+        { at: daysAgo(10), value: 0, score: null },
+        { at: daysAgo(3), value: 4, score: null },
     ])
 })
 

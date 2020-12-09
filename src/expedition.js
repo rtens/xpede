@@ -295,8 +295,8 @@ class Chunked extends Metric {
     dates() {
         const size = this.size.get()
 
-        const lastDate = this.input.get().get().data().last().get().at.get()
-        const untilDate = new Date(lastDate.getTime() + size)
+        const lastDate = this.input.get().get().data().last().ifEither(d => d.at.get(), () => new Date())
+        const untilDate = new Date(Math.min(new Date().getTime(), lastDate.getTime() + size))
         const dates = []
         let date = this.start.get()
         while (date <= untilDate) {
