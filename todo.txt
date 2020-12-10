@@ -1,3 +1,1 @@
-- Readme with explanations of UI
-- Support changing Targets
-- Use Units
+- Readme with explanations of concept/UI
