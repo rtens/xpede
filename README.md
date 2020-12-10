@@ -14,22 +14,24 @@ chmod +x edit
 
 ## Usage
 
-To edit an Expedition named `my_expedition` use
+To edit an Expedition named `first` use
 
 ```
-./edit my_expedition
+./edit first
 ```
 
 This starts the node REPL with the loaded or created Expedition assigned to the variable `e`.
 
-You can now edit the Expedition, i.e. add a Mountain with Summit:
+You can now edit the Expedition, i.e. add a Mountain with a Goal:
 
 ```
+e.name.set('My First Expedition')
+
 m = e.mountains.add().create()
 m.name.set('Health')
 
-s = m.summit.create()
-s.summary.set('Be healthy')
+g = m.goals.add().create()
+g.caption.set('Be healthy')
 ```
 
 To save the Expedition and create its Dashboards use
@@ -38,4 +40,4 @@ To save the Expedition and create its Dashboards use
 e.save()
 ```
 
-The expedition is now saved as `store/my_expedition.json` and the Dashboards can be found in `out`.
+The expedition is now saved as `store/first.json` and the Dashboard can be found in `out/first.html`.
