@@ -36,8 +36,7 @@ specify('Expedition with Goals', () => {
         "caption": "Be Foo",
         "description": "Be a Foo not a Bar",
         "ok": 12,
-        "good": 24,
-        "status": []
+        "good": 24
     }])
 })
 
@@ -73,8 +72,7 @@ specify('Expedition with Indicators', () => {
         "caption": "Be Foo",
         "description": "Be a Foo not a Bar",
         "ok": 12,
-        "good": 24,
-        "status": []
+        "good": 24
     }])
 
     const me = i.metric.pick(0).createMeasured()
@@ -84,29 +82,18 @@ specify('Expedition with Indicators', () => {
 
     assert.equal(e.status().mountains[0].indicators[0].metric, {
         "caption": "A Metric",
-        "description": "Some Metric"
+        "description": "Some Metric",
+        "data": []
     })
 
     me.measure(new Date('2020-11-12'), 0)
     me.measure(new Date('2020-11-13'), 18)
     me.measure(new Date('2020-11-14'), 30)
 
-    assert.equal(e.status().mountains[0].indicators[0].status, [
-        {
-            "at": "2020-11-12T00:00:00.000Z",
-            "value": 0,
-            "score": -1
-        },
-        {
-            "at": "2020-11-13T00:00:00.000Z",
-            "value": 18,
-            "score": .5
-        },
-        {
-            "at": "2020-11-14T00:00:00.000Z",
-            "value": 30,
-            "score": 1.5
-        }
+    assert.equal(e.status().mountains[0].indicators[0].metric.data, [
+        { "at": "2020-11-12T00:00:00.000Z", "value": 0 },
+        { "at": "2020-11-13T00:00:00.000Z", "value": 18 },
+        { "at": "2020-11-14T00:00:00.000Z", "value": 30 }
     ])
 })
 
@@ -120,9 +107,9 @@ specify('Indicator without thresholds', () => {
             })
         })
 
-    assert.equal(e.status().mountains[0].indicators[0].status, [
-        { at: '2020-11-12T00:00:00.000Z', value: 10, score: null },
-        { at: '2020-11-13T00:00:00.000Z', value: 3, score: null }
+    assert.equal(e.status().mountains[0].indicators[0].metric.data, [
+        { at: '2020-11-12T00:00:00.000Z', value: 10 },
+        { at: '2020-11-13T00:00:00.000Z', value: 3 },
     ])
 })
 
@@ -148,9 +135,9 @@ specify('Combined Metric', () => {
             })
         })
 
-    assert.equal(e.status().mountains[0].indicators[0].status, [
-        { at: '2020-11-12T00:00:00.000Z', value: 13, score: 0.3 },
-        { at: '2020-11-13T00:00:00.000Z', value: 14, score: 0.4 }
+    assert.equal(e.status().mountains[0].indicators[0].metric.data, [
+        { at: '2020-11-12T00:00:00.000Z', value: 13 },
+        { at: '2020-11-13T00:00:00.000Z', value: 14 },
     ])
 })
 
@@ -168,10 +155,10 @@ specify('Smoothed Metric', () => {
             })
         })
 
-    assert.equal(e.status().mountains[0].indicators[0].status, [
-        { at: '2020-11-12T00:00:00.000Z', value: 10, score: null },
-        { at: '2020-11-13T00:00:00.000Z', value: 10.5, score: null },
-        { at: '2020-11-14T00:00:00.000Z', value: 12.5, score: null }
+    assert.equal(e.status().mountains[0].indicators[0].metric.data, [
+        { at: '2020-11-12T00:00:00.000Z', value: 10 },
+        { at: '2020-11-13T00:00:00.000Z', value: 10.5 },
+        { at: '2020-11-14T00:00:00.000Z', value: 12.5 },
     ])
 })
 
@@ -189,22 +176,22 @@ specify('Chunked Metric', () => {
             })
         })
 
-    assert.equal(e.status().mountains[0].indicators[0].status, [
-        { at: daysAgo(24), value: 0, score: null },
-        { at: daysAgo(17), value: 0, score: null },
-        { at: daysAgo(10), value: 0, score: null },
-        { at: daysAgo(3), value: 0, score: null },
+    assert.equal(e.status().mountains[0].indicators[0].metric.data, [
+        { at: daysAgo(24), value: 0 },
+        { at: daysAgo(17), value: 0 },
+        { at: daysAgo(10), value: 0 },
+        { at: daysAgo(3), value: 0 },
     ])
 
     measured.measure(daysAgo(23), 1)
     measured.measure(daysAgo(17), 2)
     measured.measure(daysAgo(9), 4)
 
-    assert.equal(e.status().mountains[0].indicators[0].status, [
-        { at: daysAgo(24), value: 0, score: null },
-        { at: daysAgo(17), value: 3, score: null },
-        { at: daysAgo(10), value: 0, score: null },
-        { at: daysAgo(3), value: 4, score: null },
+    assert.equal(e.status().mountains[0].indicators[0].metric.data, [
+        { at: daysAgo(24), value: 0 },
+        { at: daysAgo(17), value: 3 },
+        { at: daysAgo(10), value: 0 },
+        { at: daysAgo(3), value: 4 },
     ])
 })
 

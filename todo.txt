@@ -1,7 +1,3 @@
-- Unify templates of status and goals dashboards
-
-- Support many Mountains
-- Pull changes of XBerg version
 - Readme with explanations of UI
 - Support changing Targets
 - Use Units

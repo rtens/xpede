@@ -67,8 +67,6 @@
     <script>
         const model = /**STATUS*/testStatus()/*STATUS**/
 
-        setInterval(() => location.reload(true), 5 * 60 * 1000)
-
         const $dashboard = $('.dashboard')
         const $_goal = $('.goal').remove()
         const $_indicator = $('.indicator').remove()
@@ -129,28 +127,34 @@
                 return -Infinity
             }
 
-            $indicator.find('.metric').html(indicator.metric.caption)
-            $indicator.find('.metric').prop('title', indicator.metric.description)
+            return renderMetric($indicator, indicator.ok, indicator.good, indicator.metric)
+        }
 
-            const status = indicator.status[indicator.status.length - 1]
+        function renderMetric($indicator, ok, good, metric) {
+            $indicator.find('.metric').html(metric.caption)
+            $indicator.find('.metric').prop('title', metric.description)
+
+            const status = metric.data[metric.data.length - 1]
             if (!status) {
                 $indicator.find('.value').html('')
-                $indicator.find('.graph').html('ok: ' + indicator.ok + '<br>good: ' + indicator.good)
+                $indicator.find('.graph').html('ok: ' + ok + '<br>good: ' + good)
                 return -Infinity
             }
 
-            const score = status.score === null ? -Infinity : status.score
+            let score = -Infinity
+            if (ok && good) score = (status.value - ok) / (good - ok)
 
             colorCode($indicator, score)
             $indicator.find('.value').html(Math.round(status.value * 100) / 100)
 
             const $graph = $indicator.find('.graph')
-            then.push(() => drawGraph($graph, indicator))
+            then.push(() => drawGraph($graph, ok, good, metric.data))
 
             return score
+
         }
 
-        function drawGraph($graph, indicator) {
+        function drawGraph($graph, ok, good, data) {
             const fontSize = 20
             const padding = fontSize * 1.5
             const margin = 5
@@ -170,10 +174,10 @@
 
             const now = new Date()
             const start = new Date(now.getTime() - window)
-            const inWindow = indicator.status.filter(s => new Date(s.at) >= start)
+            const inWindow = data.filter(s => new Date(s.at) >= start)
 
-            const norm = (indicator.ok !== null && indicator.good !== null)
-                ? value => (value - indicator.ok) / (indicator.good - indicator.ok)
+            const norm = (ok !== null && good !== null)
+                ? value => (value - ok) / (good - ok)
                 : value => value
 
             const max = inWindow.reduce((acc, i) => Math.max(acc, norm(i.value)), 1)
@@ -187,7 +191,7 @@
 
             ctx.lineWidth = 9
             ctx.beginPath()
-            indicator.status.forEach((status, i) =>
+            data.forEach((status, i) =>
                 (i ? ctx.lineTo : ctx.moveTo)
                     .call(ctx, x(new Date(status.at)), y(norm(status.value))))
             ctx.stroke()
@@ -203,17 +207,17 @@
 
             ctx.lineWidth = 3;
 
-            if (indicator.good !== null) {
+            if (good !== null) {
                 stroke(start, 1, now, 1)
-                write('good ' + format(indicator.good), now, 1, 10-fontSize)
+                write('good ' + format(good), now, 1, 10 - fontSize)
             } else {
                 stroke(start, max, now, max)
-                write('max ' + format(max), now, max, 10-fontSize)
+                write('max ' + format(max), now, max, 10 - fontSize)
             }
 
-            if (indicator.ok !== null) {
+            if (ok !== null) {
                 stroke(start, 0, now, 0)
-                write('ok ' + format(indicator.ok), now, 0)
+                write('ok ' + format(ok), now, 0)
 
                 for (let w = start.getTime(); w <= now.getTime(); w += 7 * 24 * 3600 * 1000) {
                     stroke(new Date(w), 5 / dy, new Date(w), -5 / dy)
@@ -232,35 +236,6 @@
         }
 
         function testStatus() {
-            function testData(ok, good) {
-                const data = []
-                for (let i = Math.random() * 7; i < Math.random() * 60 + 20; i += Math.random() * 4 + 3) {
-                    const value = Math.random() * 40 - 10
-                    data.unshift({
-                        "at": new Date(new Date().getTime() - i * 24 * 3600 * 1000),
-                        "value": value,
-                        "score": (ok !== null && good !== null) ? (value - ok) / (good - ok) : null
-                    })
-                }
-                return data
-            }
-
-            function testIndicator(parent, name) {
-                const ok = Math.random() > .1 ? Math.random() * 10 : null
-                const good = Math.random() > .1 ? Math.random() * 20 + 15 : null
-
-                return {
-                    "caption": "Be " + name + " with " + parent,
-                    "description": "Be a " + name + " not a foo",
-                    "ok": ok,
-                    "good": good,
-                    "metric": {
-                        "caption": name + " of " + parent + " Metric",
-                        "description": "Some Metric for " + name + " of " + parent
-                    },
-                    "status": testData(ok, good)
-                }
-            }
 
             function testMountain(name) {
                 return {
@@ -285,6 +260,36 @@
                         testIndicator(name, 'five'),
                     ].slice(0, Math.random() * 4 + 2)
                 }
+            }
+
+            function testIndicator(parent, name) {
+                const ok = Math.random() > .1 ? Math.random() * 10 : null
+                const good = Math.random() > .1 ? Math.random() * 20 + 15 : null
+
+                return {
+                    "caption": "Be " + name + " with " + parent,
+                    "description": "Be a " + name + " not a foo",
+                    "ok": ok,
+                    "good": good,
+                    "metric": {
+                        "caption": name + " of " + parent + " Metric",
+                        "description": "Some Metric for " + name + " of " + parent,
+                        "data": testData(ok, good)
+                    }
+                }
+            }
+
+            function testData(ok, good) {
+                const data = []
+                for (let i = Math.random() * 7; i < Math.random() * 60 + 20; i += Math.random() * 4 + 3) {
+                    const value = Math.random() * 40 - 10
+                    data.unshift({
+                        "at": new Date(new Date().getTime() - i * 24 * 3600 * 1000),
+                        "value": value,
+                        "score": (ok !== null && good !== null) ? (value - ok) / (good - ok) : null
+                    })
+                }
+                return data
             }
 
             return {

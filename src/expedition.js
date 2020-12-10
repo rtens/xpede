@@ -89,26 +89,8 @@ class Indicator {
             description: this.description.get(),
             ok: this.ok.get(),
             good: this.good.get(),
-            metric: this.metric.ifThere(m => m.get().info()),
-            status: this.metric.ifEither(
-                m => m.get().data().getAll().map(d => this.withScore(d)),
-                () => [])
+            metric: this.metric.ifThere(m => m.get().status())
         }
-    }
-
-    withScore(datum) {
-        return {
-            at: datum.at.get(),
-            value: datum.value.get(),
-            score: this.scoreOf(datum.value.get())
-        }
-    }
-
-    scoreOf(value) {
-        const ok = this.ok.get()
-        const good = this.good.get()
-
-        return (value - ok) / (good - ok)
     }
 
     metrics() {
@@ -122,10 +104,11 @@ class Metric {
         this.description = Value.of(String)
     }
 
-    info() {
+    status() {
         return {
             caption: this.caption.get(),
-            description: this.description.get()
+            description: this.description.get(),
+            data: this.data().getAll().map(d => d.flat())
         }
     }
 
@@ -319,6 +302,13 @@ class Datum {
     constructor() {
         this.at = Value.of(Date)
         this.value = Value.of(Number)
+    }
+
+    flat() {
+        return {
+            at: this.at.get(),
+            value: this.value.get()
+        }
     }
 }
 
