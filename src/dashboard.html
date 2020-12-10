@@ -196,6 +196,12 @@
                     .call(ctx, x(new Date(status.at)), y(norm(status.value))))
             ctx.stroke()
 
+            data.forEach(status => {
+                ctx.beginPath();
+                ctx.arc(x(new Date(status.at)), y(norm(status.value)), 8, 0, 2 * Math.PI, false);
+                ctx.fill();
+            })
+
             const format = i => Math.round(i * 10) / 10
             const write = (value, x1, y1, offset = fontSize) => ctx.fillText(value, x(x1) - 2, y(y1) + offset)
             const stroke = (x1, y1, x2, y2) => {
