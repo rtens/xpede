@@ -142,7 +142,7 @@
             }
 
             let score = -Infinity
-            if (ok && good) score = (status.value - ok) / (good - ok)
+            if (ok !== null && good !== null) score = (status.value - ok) / (good - ok)
 
             colorCode($indicator, score)
             $indicator.find('.value').html(Math.round(status.value * 100) / 100)
