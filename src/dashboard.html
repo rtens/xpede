@@ -91,15 +91,17 @@
                 .reduce((min, score) => Math.min(min, score), Infinity)
 
             const goals = mountain.goals
-                .map(goal => renderGoal($mountain, goal))
+                .map((goal, i) => renderGoal($mountain, goal, i > 0))
                 .reduce((min, score) => Math.min(min, score), Infinity)
 
             colorCode($mountain.find('.mountain-info'), score < Infinity ? score : goals)
         }
 
-        function renderGoal($mountain, goal) {
+        function renderGoal($mountain, goal, isStopover) {
             $goal = $_goal.clone()
             $mountain.find('.goals').append($goal)
+
+            if (isStopover) $goal.find('img').prop('src', '../assets/icons/stopover.png')
 
             $goal.find('.goal-info .caption').html(goal.caption)
             $goal.find('.goal-info .description').html(goal.description)
@@ -107,7 +109,7 @@
             if (goal.criteria.length === 0) $goal.find('.criteria').remove()
 
             const score = goal.criteria
-                .map(indicator => renderIndicator($goal.find('.criteria'), indicator))
+                .map(indicator => renderIndicator($goal.find('.criteria'), indicator, true))
                 .reduce((min, score) => Math.min(min, score), Infinity)
 
             colorCode($goal.find('.goal-info'), score)
@@ -115,9 +117,11 @@
             return score
         }
 
-        function renderIndicator($container, indicator) {
+        function renderIndicator($container, indicator, isCriterion) {
             $indicator = $_indicator.clone()
             $container.append($indicator)
+
+            if (isCriterion) $indicator.find('img').prop('src', '../assets/icons/criterion.png')
 
             $indicator.find('.caption').html(indicator.caption)
             $indicator.find('.description').html(indicator.description)
@@ -248,23 +252,30 @@
                     "name": name,
                     "reason": "Because " + name.toLowerCase(),
                     "goals": [
-                        {
-                            "caption": "Climb " + name,
-                            "description": "I have climbed on top of " + name,
-                            "criteria": [
-                                testIndicator(name, 'one'),
-                                testIndicator(name, 'two'),
-                                testIndicator(name, 'three'),
-                            ]
-                        }
-                    ],
-                    "indicators": [
+                        testGoal("Top of " + name),
+                        testGoal("Stopover one of " + name),
+                        testGoal("Stopover two of " + name),
+                        testGoal("Stopover three of " + name),
+                    ].slice(0, Math.random() * 4 + 1),
+                    "indicators": Math.random() < .5 ? [] : [
                         testIndicator(name, 'one'),
                         testIndicator(name, 'two'),
                         testIndicator(name, 'three'),
                         testIndicator(name, 'four'),
                         testIndicator(name, 'five'),
                     ].slice(0, Math.random() * 4 + 2)
+                }
+            }
+
+            function testGoal(name) {
+                return {
+                    "caption": name,
+                    "description": "I have reached " + name,
+                    "criteria": [
+                        testIndicator(name, 'one'),
+                        testIndicator(name, 'two'),
+                        testIndicator(name, 'three'),
+                    ]
                 }
             }
 
@@ -305,7 +316,9 @@
                     testMountain('Two'),
                     testMountain('Three'),
                     testMountain('Four'),
-                ]
+                    testMountain('Five'),
+                    testMountain('Six'),
+                ].slice(0, Math.random() * 5 + 2)
             }
         }
     </script>
