@@ -202,7 +202,7 @@
 
             data.forEach(status => {
                 ctx.beginPath();
-                ctx.arc(x(new Date(status.at)), y(norm(status.value)), 8, 0, 2 * Math.PI, false);
+                ctx.arc(x(new Date(status.at)), y(norm(status.value)), 6, 0, 2 * Math.PI, false);
                 ctx.fill();
             })
 
