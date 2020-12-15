@@ -90,7 +90,7 @@
                 .map(indicator => renderIndicator($mountain.find('.indicators'), indicator))
                 .reduce((min, score) => Math.min(min, score), Infinity)
 
-            const goals = mountain.goals
+            const goals = mountain.goals.reverse()
                 .map((goal, i) => renderGoal($mountain, goal, i > 0))
                 .reduce((min, score) => Math.min(min, score), Infinity)
 
@@ -252,18 +252,20 @@
                     "name": name,
                     "reason": "Because " + name.toLowerCase(),
                     "goals": [
+                        ...[
+                            testGoal("Stopover one of " + name),
+                            testGoal("Stopover two of " + name),
+                            testGoal("Stopover three of " + name)
+                        ].slice(0, Math.random() * 3.5),
                         testGoal("Top of " + name),
-                        testGoal("Stopover one of " + name),
-                        testGoal("Stopover two of " + name),
-                        testGoal("Stopover three of " + name),
-                    ].slice(0, Math.random() * 4 + 1),
+                    ],
                     "indicators": Math.random() < .5 ? [] : [
                         testIndicator(name, 'one'),
                         testIndicator(name, 'two'),
                         testIndicator(name, 'three'),
                         testIndicator(name, 'four'),
                         testIndicator(name, 'five'),
-                    ].slice(0, Math.random() * 4 + 2)
+                    ].slice(0, Math.random() * 3.5 + 2)
                 }
             }
 
@@ -318,7 +320,7 @@
                     testMountain('Four'),
                     testMountain('Five'),
                     testMountain('Six'),
-                ].slice(0, Math.random() * 5 + 2)
+                ].slice(0, Math.random() * 4.5 + 2)
             }
         }
     </script>
