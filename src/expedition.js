@@ -29,7 +29,7 @@ class Mountain {
         this.reason = Value.of(String)
 
         this.goals = Many.of(Goal)
-        this.indicators = Many.of(Either.of(One.of(Indicator), Reference.to(Indicator)))
+        this.indicators = Many.of(Flex(Indicator))
     }
 
     status() {
@@ -80,7 +80,7 @@ class Indicator {
         this.ok = Value.of(Number)
         this.good = Value.of(Number)
 
-        this.metric = Either.of(One.of(Metric), Reference.to(Metric))
+        this.metric = Flex(Metric)
     }
 
     status() {
@@ -169,7 +169,7 @@ extend(Measured, Metric)
 class Combined extends Metric {
     constructor() {
         super()
-        this.inputs = Map.of(Either.of(One.of(Metric), Reference.to(Metric)))
+        this.inputs = Map.of(Flex(Metric))
         this.formula = Formula.for(Value.of(Number))
     }
 
@@ -214,7 +214,7 @@ class Smoothed extends Metric {
     constructor() {
         super()
         this.window = Value.of(Number)
-        this.input = Either.of(One.of(Metric), Reference.to(Metric))
+        this.input = Flex(Metric)
     }
 
     data() {
@@ -254,7 +254,7 @@ class Chunked extends Metric {
         super()
         this.start = Value.of(Date)
         this.size = Value.of(Number)
-        this.input = Either.of(One.of(Metric), Reference.to(Metric))
+        this.input = Flex(Metric)
     }
 
     data() {
@@ -328,5 +328,7 @@ class Website extends Source {
     }
 }
 extend(Website, Source)
+
+const Flex = type => Either.of(One.of(type), Reference.to(type))
 
 module.exports = Expedition
