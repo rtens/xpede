@@ -322,4 +322,9 @@ specify('Either', () => {
         a(Either.of(One.of(A), Value.of(String)), e =>
             e.pick(1).set('foo') || e),
         { "picked": 1, "object": "foo" })
+
+    assert.same(Either.of(One.of(A), Many.of(String)),
+        a(Either.of(One.of(A), Many.of(String)), e =>
+            e.pickOneOfA().create() && e),
+        { "picked": 0, "object": { "type": "A", "fields": {} } })
 })

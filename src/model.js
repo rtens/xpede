@@ -207,6 +207,8 @@ class Either extends ObjectContainer {
         super('any')
         this.containers = containers
         this.picked = null
+
+        containers.forEach((c, i) => this._addPicker(c, i))
     }
 
     options() {
@@ -225,6 +227,11 @@ class Either extends ObjectContainer {
 
     description() {
         return 'Either of ' + this.containers.map(c => c.description()).join(', ')
+    }
+
+    _addPicker(container, index) {
+        const name = container.description().split(' ').map(w => w[0].toUpperCase() + w.slice(1)).join('')
+        this['pick' + name] = () => this.pick(index)
     }
 }
 Either.of = (...containers) => new Either(...containers)
