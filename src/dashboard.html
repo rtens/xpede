@@ -81,6 +81,7 @@
         const then = []
         model.mountains.forEach(renderMountain)
         then.forEach(t => t())
+        $('.collapse.show').removeClass('show')
 
         function renderMountain(mountain) {
             $mountain = $_mountain.clone()
@@ -342,8 +343,6 @@
                 ].slice(0, Math.random() * 4.5 + 2)
             }
         }
-
-        setTimeout(() => $('.collapse.show').removeClass('show'), 500)
     </script>
 
 </body>
