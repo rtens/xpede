@@ -104,6 +104,16 @@ class Many extends Container {
         return i
     }
 
+    insert(index, item = null) {
+        const i = item || this.container.clone()
+        this.items.splice(index, 0, i)
+        return i
+    }
+
+    remove(index) {
+        return this.items.splice(index, 1)[0]
+    }
+
     isEmpty() {
         return this.items.length == 0
     }
