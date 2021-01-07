@@ -262,8 +262,8 @@ specify('Reference', () => {
 
     class TwoReferences {
         constructor(fn) {
-            this.first = One.of(ReferencedObject)
             this.second = Reference.to(ReferencedObject)
+            this.first = One.of(ReferencedObject)
             this.third = Reference.to(ReferencedObject)
             if (fn) fn(this)
         }
@@ -274,7 +274,13 @@ specify('Reference', () => {
             o.first.create() &&
             o.second.point(o.first.get()) &&
             o.third.point(o.first.get())),
-        { "type": "TwoReferences", "fields": { "first": { "id": "@1", "type": "ReferencedObject", "fields": {} }, "second": "@1", "third": "@1" } })
+        {
+            "type": "TwoReferences", "fields": {
+                "second": "@1",
+                "first": { "id": "@1", "type": "ReferencedObject", "fields": {} },
+                "third": "@1"
+            }
+        })
 
     class ManyReferences {
         constructor(fn) {

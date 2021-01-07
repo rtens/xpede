@@ -3,7 +3,7 @@ fs = require('fs');
 class Storing {
     constructor(object) {
         this.root = object
-        this.registry = new Registry()
+        this.registry = new StoringRegistry()
     }
 
     toFile(filename) {
@@ -64,10 +64,41 @@ class Storing {
     }
 }
 
+class StoringRegistry {
+    constructor() {
+        this.registrations = []
+    }
+
+    nextId() {
+        return '@' + (this.registrations.length + 1)
+    }
+
+    reference(object) {
+        if (!object) return null
+
+        const registered = this.registrations.find(r => r.object === object)
+        if (registered) {
+            if (registered.whenReferenced) registered.whenReferenced(registered.id)
+            return registered.id
+        } else {
+            const id = this.nextId()
+            this.registrations.push({ object, id })
+            return id
+        }
+
+    }
+
+    register(object, whenReferenced) {
+        const referenced = this.registrations.find(r => r.object === object)
+        if (referenced) whenReferenced(referenced.id)
+        else this.registrations.push({ object, whenReferenced, id: this.nextId() })
+    }
+}
+
 class Loading {
     constructor(deflated) {
         this.deflated = deflated
-        this.registry = new Registry()
+        this.registry = new LoadingRegistry()
     }
 
     inflated(object) {
@@ -124,6 +155,28 @@ Loading.fromFlat = flat => new Loading(flat)
 Loading.fromString = string => Loading.fromFlat(JSON.parse(string))
 Loading.fromFile = filename => Loading.fromString(fs.readFileSync(filename, 'utf8'))
 
+class LoadingRegistry {
+    constructor() {
+        this.registrations = []
+    }
+
+    find(id, whenFound) {
+        const found = this.registrations.find(o => o.id == id)
+        if (found) whenFound(found.object)
+        else this.registrations.push({ id, whenFound })
+    }
+
+    found(id, object) {
+        const looking = this.registrations.find(o => o.id == id)
+        if (looking) {
+            looking.object = object
+            looking.whenFound(object)
+        } else {
+            this.registrations.push({ id, object })
+        }
+    }
+}
+
 class Dashboard {
     constructor(expedition) {
         this.expedition = expedition
@@ -137,49 +190,6 @@ class Dashboard {
         const template = fs.readFileSync(input, 'utf8')
         fs.writeFileSync(output, template
             .replace(/\/\*\*STATUS\*\/.*\/\*STATUS\*\*\//, JSON.stringify(model)))
-    }
-}
-
-class Registry {
-    constructor() {
-        this.registrations = []
-    }
-
-    nextId() {
-        return '@' + (this.registrations.length + 1)
-    }
-
-    reference(object) {
-        if (!object) return null
-
-        const registered = this.registrations.find(r => r.object === object)
-        if (registered) {
-            registered.whenReferenced(registered.id)
-            return registered.id
-        } else {
-            const id = this.nextId()
-            this.registrations.push({ object, id })
-            return id
-        }
-
-    }
-
-    register(object, whenReferenced) {
-        const referenced = this.registrations.find(r => r.object === object)
-        if (referenced) whenReferenced(referenced.id)
-        else this.registrations.push({ object, whenReferenced, id: this.nextId() })
-    }
-
-    find(id, whenFound) {
-        const found = this.registrations.find(o => o.id == id)
-        if (found) whenFound(found.object)
-        else this.registrations.push({ id, whenFound })
-    }
-
-    found(id, object) {
-        const looking = this.registrations.find(o => o.id == id)
-        if (looking) looking.whenFound(object)
-        else this.registrations.push({ id, object })
     }
 }
 
