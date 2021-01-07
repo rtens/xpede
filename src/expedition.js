@@ -186,7 +186,7 @@ class Derived extends Metric {
                             d.value.set(result)
                         }))
             } catch (e) {
-                console.error('Error in [' + this.caption.get() + '] for [' + date.toISOString() + ']: ' + e)
+                // console.error('Error in [' + this.caption.get() + '] for [' + date.toISOString() + ']: ' + e)
             }
         })
         return data
