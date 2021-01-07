@@ -1,1 +1,6 @@
 - Readme with explanations of concept/UI
+- browse through input metrics in dashboard
+- add mission to Expedition
+- maybe add values to Expedition
+- visualize Expedition with mission (and maybe values) and status
+- separate summit from waypoints
