@@ -29,7 +29,16 @@ class Storing {
             return object.object
 
         } else if (type == 'One') {
-            return object.exists() ? this.deflate(object.object) : null
+            if (!object.exists())
+                return null
+
+            if (this.registry.has(object.object))
+                return this.registry.reference(object.object)
+
+            const flat = this.deflate(object.object)
+            this.registry.add(object.object, id => flat.id = id)
+
+            return flat
 
         } else if (type == 'Many') {
             return object.items.map(i => this.deflate(i))
@@ -38,9 +47,6 @@ class Storing {
             const flatMap = {}
             Object.keys(object.map).forEach(k => flatMap[k] = this.deflate(object.map[k]))
             return flatMap
-
-        } else if (type == 'Reference') {
-            return this.registry.reference(object.object)
 
         } else if (type == 'Either') {
             return {
@@ -56,10 +62,7 @@ class Storing {
             Object.keys(object).forEach(k =>
                 fields[k] = this.deflate(object[k]))
 
-            const deflated = { id: undefined, type, fields }
-            this.registry.register(object, id => deflated.id = id)
-
-            return deflated
+            return { id: undefined, type, fields }
         }
     }
 }
@@ -67,31 +70,26 @@ class Storing {
 class StoringRegistry {
     constructor() {
         this.registrations = []
+        this.count = 1
     }
 
     nextId() {
-        return '@' + (this.registrations.length + 1)
+        return '@' + this.count++
+    }
+
+    has(object) {
+        return !!this.registrations.find(r => r.object === object)
     }
 
     reference(object) {
-        if (!object) return null
-
-        const registered = this.registrations.find(r => r.object === object)
-        if (registered) {
-            if (registered.whenReferenced) registered.whenReferenced(registered.id)
-            return registered.id
-        } else {
-            const id = this.nextId()
-            this.registrations.push({ object, id })
-            return id
-        }
-
+        const found = this.registrations.find(r => r.object === object)
+        if (!found.id) found.id = this.nextId()
+        found.whenReferenced(found.id)
+        return found.id
     }
 
-    register(object, whenReferenced) {
-        const referenced = this.registrations.find(r => r.object === object)
-        if (referenced) whenReferenced(referenced.id)
-        else this.registrations.push({ object, whenReferenced, id: this.nextId() })
+    add(object, whenReferenced) {
+        this.registrations.push({ object, whenReferenced })
     }
 }
 
@@ -119,7 +117,12 @@ class Loading {
             }
 
         } else if (type == 'One') {
-            if (flat) object.object = this.inflate(flat, new object.type)
+            if (typeof flat == 'string') {
+                object.object = this.registry.get(flat)
+            } else if (flat) {
+                object.object = this.inflate(flat, new object.type)
+                if (flat.id) this.registry.put(flat.id, object.object)
+            }
 
         } else if (type == 'Many') {
             object.items = flat.map(i => this.inflate(i, object.container.clone()))
@@ -127,9 +130,6 @@ class Loading {
         } else if (type == 'Map') {
             Object.keys(flat).forEach(k =>
                 object.map[k] = this.inflate(flat[k], object.container.clone()))
-
-        } else if (type == 'Reference') {
-            this.registry.find(flat, o => object.object = o)
 
         } else if (type == 'Either') {
             if (flat.picked !== null) object.object = this.inflate(flat.object, object['pick' + flat.picked]())
@@ -142,7 +142,6 @@ class Loading {
                 const impl = object.constructor.abstracting.find(a => a.name == flat.type)
                 object = new impl
             }
-            if (flat.id) this.registry.found(flat.id, object)
             Object.keys(flat.fields).forEach(k =>
                 object[k] = this.inflate(flat.fields[k], object[k]))
         }
@@ -159,20 +158,12 @@ class LoadingRegistry {
         this.registrations = []
     }
 
-    find(id, whenFound) {
-        const found = this.registrations.find(o => o.id == id)
-        if (found) whenFound(found.object)
-        else this.registrations.push({ id, whenFound })
+    get(id) {
+        return this.registrations.find(o => o.id == id).object
     }
 
-    found(id, object) {
-        const looking = this.registrations.find(o => o.id == id)
-        if (looking) {
-            looking.object = object
-            looking.whenFound(object)
-        } else {
-            this.registrations.push({ id, object })
-        }
+    put(id, object) {
+        this.registrations.push({ id, object })
     }
 }
 

@@ -225,59 +225,47 @@ specify('Map', () => {
 specify('Reference', () => {
     class ReferencedObject { }
 
-    class ObjectFirst {
+    class TwoReferences {
         constructor(fn) {
             this.first = One.of(ReferencedObject)
-            this.second = Reference.to(ReferencedObject)
-            if (fn) fn(this)
-        }
-    }
-
-    assert.equal(
-        a(new ObjectFirst(), o =>
-            o.first.create(f => f.foo = 42) &&
-            o.second.point(o.first.get()) &&
-            o.second.get()),
-        { "foo": 42 })
-
-    assert.same(new ObjectFirst,
-        new ObjectFirst(o =>
-            o.first.create() &&
-            o.second.point(o.first.get())),
-        { "type": "ObjectFirst", "fields": { "first": { "id": "@1", "type": "ReferencedObject", "fields": {} }, "second": "@1" } })
-
-    class ReferenceFirst {
-        constructor(fn) {
-            this.first = Reference.to(ReferencedObject)
             this.second = One.of(ReferencedObject)
             if (fn) fn(this)
         }
     }
 
-    assert.same(new ReferenceFirst,
-        new ReferenceFirst(o =>
-            o.second.create() &&
-            o.first.point(o.second.get())),
-        { "type": "ReferenceFirst", "fields": { "first": "@1", "second": { "id": "@1", "type": "ReferencedObject", "fields": {} } } })
-
-    class TwoReferences {
-        constructor(fn) {
-            this.second = Reference.to(ReferencedObject)
-            this.first = One.of(ReferencedObject)
-            this.third = Reference.to(ReferencedObject)
-            if (fn) fn(this)
-        }
-    }
+    assert.equal(
+        a(new TwoReferences(), o =>
+            o.first.create(f => f.foo = 42) &&
+            o.second.make(o.first.get()) &&
+            o.second.get()),
+        { "foo": 42 })
 
     assert.same(new TwoReferences,
         new TwoReferences(o =>
             o.first.create() &&
-            o.second.point(o.first.get()) &&
-            o.third.point(o.first.get())),
+            o.second.make(o.first.get())),
+        { "type": "TwoReferences", "fields": { 
+            "first": { "id": "@1", "type": "ReferencedObject", "fields": {} }, 
+            "second": "@1" } })
+
+    class ThreeReferences {
+        constructor(fn) {
+            this.first = One.of(ReferencedObject)
+            this.second = One.of(ReferencedObject)
+            this.third = One.of(ReferencedObject)
+            if (fn) fn(this)
+        }
+    }
+
+    assert.same(new ThreeReferences,
+        new ThreeReferences(o =>
+            o.first.create() &&
+            o.second.make(o.first.get()) &&
+            o.third.make(o.first.get())),
         {
-            "type": "TwoReferences", "fields": {
-                "second": "@1",
+            "type": "ThreeReferences", "fields": {
                 "first": { "id": "@1", "type": "ReferencedObject", "fields": {} },
+                "second": "@1",
                 "third": "@1"
             }
         })
@@ -285,7 +273,7 @@ specify('Reference', () => {
     class ManyReferences {
         constructor(fn) {
             this.first = One.of(ReferencedObject)
-            this.second = Many.of(Reference.to(ReferencedObject))
+            this.second = Many.of(One.of(ReferencedObject))
             if (fn) fn(this)
         }
     }
@@ -293,8 +281,8 @@ specify('Reference', () => {
     assert.same(new ManyReferences,
         new ManyReferences(o =>
             o.first.create() &&
-            o.second.add().point(o.first.get()) &&
-            o.second.add().point(o.first.get())),
+            o.second.add().make(o.first.get()) &&
+            o.second.add().make(o.first.get())),
         { "type": "ManyReferences", "fields": { "first": { "id": "@1", "type": "ReferencedObject", "fields": {} }, "second": ["@1", "@1"] } })
 })
 

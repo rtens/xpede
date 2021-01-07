@@ -1,4 +1,4 @@
-const { Value, One, Many, Map, Reference, Either, Formula, extend } = require('./model')
+const { Value, One, Many, Map, Formula, extend } = require('./model')
 
 class Expedition {
     constructor() {
@@ -29,7 +29,7 @@ class Mountain {
         this.reason = Value.of(String)
 
         this.goals = Many.of(Goal)
-        this.indicators = Many.of(Flex(Indicator))
+        this.indicators = Many.of(Indicator)
     }
 
     status() {
@@ -39,14 +39,14 @@ class Mountain {
             goals: this.goals.getAll()
                 .map(g => g.status()),
             indicators: this.indicators.getAll()
-                .map(i => i.get().status())
+                .map(i => i.status())
         }
     }
 
     metrics() {
         return [
             ...this.goals.getAll().reduce((acc, g) => [...acc, ...g.metrics()], []),
-            ...this.indicators.getAll().reduce((acc, i) => [...acc, ...i.get().metrics()], []),
+            ...this.indicators.getAll().reduce((acc, i) => [...acc, ...i.metrics()], []),
         ]
     }
 }
@@ -80,7 +80,7 @@ class Indicator {
         this.ok = Value.of(Number)
         this.good = Value.of(Number)
 
-        this.metric = Flex(Metric)
+        this.metric = One.of(Metric)
     }
 
     status() {
@@ -89,12 +89,12 @@ class Indicator {
             description: this.description.get(),
             ok: this.ok.get(),
             good: this.good.get(),
-            metric: this.metric.ifThere(m => m.get().status())
+            metric: this.metric.ifThere(m => m.status())
         }
     }
 
     metrics() {
-        return this.metric.ifEither(m => m.get().metrics(), () => [])
+        return this.metric.ifEither(m => m.metrics(), () => [])
     }
 }
 
@@ -166,10 +166,10 @@ class Measured extends Metric {
 }
 extend(Measured, Metric)
 
-class Combined extends Metric {
+class Derived extends Metric {
     constructor() {
         super()
-        this.inputs = Map.of(Flex(Metric))
+        this.inputs = Map.of(Metric)
         this.formula = Formula.for(Value.of(Number))
     }
 
@@ -178,7 +178,7 @@ class Combined extends Metric {
         this.dates().forEach(date => {
             try {
                 const inputs = {}
-                this.inputs.keys().forEach(k => inputs[k] = this.inputs.at(k).get().get())
+                this.inputs.keys().forEach(k => inputs[k] = this.inputs.at(k).get())
                 this.formula.execute(inputs, date)
                     .ifThere(result =>
                         data.add().create(d => {
@@ -186,7 +186,7 @@ class Combined extends Metric {
                             d.value.set(result)
                         }))
             } catch (e) {
-                // console.error('Error in [' + this.caption.get() + '] for [' + date.toISOString() + ']: ' + e)
+                console.error('Error in [' + this.caption.get() + '] for [' + date.toISOString() + ']: ' + e)
             }
         })
         return data
@@ -194,7 +194,7 @@ class Combined extends Metric {
 
     dates() {
         const dates = []
-        this.inputs.values().forEach(m => m.get().get().data().getAll()
+        this.inputs.values().forEach(m => m.get().data().getAll()
             .forEach(l => dates.push(l.at.get())))
         dates.sort((a, b) => a - b)
         const makeUnique = (e, i) => dates.map(d => d.toISOString()).indexOf(e.toISOString()) === i
@@ -204,17 +204,17 @@ class Combined extends Metric {
     metrics() {
         return [
             this,
-            ...this.inputs.values().reduce((acc, i) => [...acc, ...i.get().get().metrics()], [])
+            ...this.inputs.values().reduce((acc, i) => [...acc, ...i.get().metrics()], [])
         ]
     }
 }
-extend(Combined, Metric)
+extend(Derived, Metric)
 
 class Smoothed extends Metric {
     constructor() {
         super()
         this.window = Value.of(Number)
-        this.input = Flex(Metric)
+        this.input = One.of(Metric)
     }
 
     data() {
@@ -223,11 +223,11 @@ class Smoothed extends Metric {
 
         const window = this.window.get()
 
-        this.input.get().get().data().getAll().forEach(datum => {
+        this.input.get().data().getAll().forEach(datum => {
             const date = datum.at.get()
             const start = new Date(date.getTime() - window)
 
-            const acc = this.input.get().get().dataBetween(start, date).getAll()
+            const acc = this.input.get().dataBetween(start, date).getAll()
                 .reduce((acc, i) =>
                     ({ sum: acc.sum + i.value.get(), n: acc.n + 1 }),
                     { sum: 0, n: 0 })
@@ -243,7 +243,7 @@ class Smoothed extends Metric {
     metrics() {
         return [
             this,
-            ...this.input.ifEither(m => m.get().metrics(), () => [])
+            ...this.input.ifEither(m => m.metrics(), () => [])
         ]
     }
 }
@@ -254,7 +254,7 @@ class Chunked extends Metric {
         super()
         this.start = Value.of(Date)
         this.size = Value.of(Number)
-        this.input = Flex(Metric)
+        this.input = One.of(Metric)
     }
 
     data() {
@@ -263,7 +263,7 @@ class Chunked extends Metric {
 
         const size = this.size.get()
         this.dates().forEach(date => {
-            const chunk = this.input.get().get()
+            const chunk = this.input.get()
                 .dataBetween(new Date(date.getTime() - size), date)
 
             data.add().create(d => {
@@ -278,7 +278,7 @@ class Chunked extends Metric {
     dates() {
         const size = this.size.get()
 
-        const lastDate = this.input.get().get().data().last().ifEither(d => d.at.get(), () => new Date())
+        const lastDate = this.input.get().data().last().ifEither(d => d.at.get(), () => new Date())
         const untilDate = new Date(Math.min(new Date().getTime(), lastDate.getTime() + size))
         const dates = []
         let date = this.start.get()
@@ -292,7 +292,7 @@ class Chunked extends Metric {
     metrics() {
         return [
             this,
-            ...this.input.ifEither(m => m.get().metrics(), () => [])
+            ...this.input.ifEither(m => m.metrics(), () => [])
         ]
     }
 }
@@ -328,7 +328,5 @@ class Website extends Source {
     }
 }
 extend(Website, Source)
-
-const Flex = type => Either.of(One.of(type), Reference.to(type))
 
 module.exports = Expedition

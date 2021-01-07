@@ -78,6 +78,11 @@ class One extends ObjectContainer {
         }
     }
 
+    make(object) {
+        this.object = object
+        return object
+    }
+
     clone() {
         return One.of(this.type)
     }
@@ -192,26 +197,6 @@ class Map extends Container {
 }
 Map.of = container => new Map(container)
 
-class Reference extends ObjectContainer {
-    constructor(type) {
-        super(type)
-    }
-
-    point(to) {
-        this.object = to
-        return to
-    }
-
-    clone() {
-        return Reference.to(this.type)
-    }
-
-    description() {
-        return 'Reference to ' + this.type.name
-    }
-}
-Reference.to = type => new Reference(type)
-
 class Either extends ObjectContainer {
     constructor(...containers) {
         super(containers)
@@ -284,7 +269,6 @@ module.exports = {
     One,
     Many,
     Map,
-    Reference,
     Either,
     Formula,
     extend
