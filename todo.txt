@@ -4,3 +4,4 @@
 - maybe add values to Expedition
 - visualize Expedition with mission (and maybe values) and status
 - separate summit from waypoints
+- save name of picked option from Either not index
