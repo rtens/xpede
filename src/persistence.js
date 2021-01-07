@@ -132,8 +132,7 @@ class Loading {
             this.registry.find(flat, o => object.object = o)
 
         } else if (type == 'Either') {
-            object.picked = flat.picked
-            if (flat.picked !== null) object.object = this.inflate(flat.object, object.containers[flat.picked].clone())
+            if (flat.picked !== null) object.object = this.inflate(flat.object, object['pick' + flat.picked]())
 
         } else if (type == 'Formula') {
             object.function = new Function('return ' + flat)()

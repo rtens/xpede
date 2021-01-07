@@ -214,34 +214,27 @@ Reference.to = type => new Reference(type)
 
 class Either extends ObjectContainer {
     constructor(...containers) {
-        super('any')
-        this.containers = containers
+        super(containers)
         this.picked = null
 
         containers.forEach((c, i) => this._addPicker(c, i))
     }
 
-    options() {
-        return this.containers
-    }
-
-    pick(index) {
-        this.picked = index
-        this.object = this.containers[index].clone()
-        return this.object
-    }
-
     clone() {
-        return Either.of(...this.containers)
+        return Either.of(...this.type)
     }
 
     description() {
         return 'Either of ' + this.containers.map(c => c.description()).join(', ')
     }
 
-    _addPicker(container, index) {
+    _addPicker(container) {
         const name = container.description().split(' ').map(w => w[0].toUpperCase() + w.slice(1)).join('')
-        this['pick' + name] = () => this.pick(index)
+        this['pick' + name] = () => {
+            this.picked = name
+            this.object = container.clone()
+            return this.object
+        }
     }
 }
 Either.of = (...containers) => new Either(...containers)

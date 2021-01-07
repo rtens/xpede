@@ -62,7 +62,7 @@ specify('Expedition with Indicators', () => {
         }
     ])
 
-    const i = m.indicators.add().pick(0).create()
+    const i = m.indicators.add().pickOneOfIndicator().create()
     i.caption.set('Be Foo')
     i.description.set('Be a Foo not a Bar')
     i.ok.set(12)
@@ -75,7 +75,7 @@ specify('Expedition with Indicators', () => {
         "good": 24
     }])
 
-    const me = i.metric.pick(0).createMeasured()
+    const me = i.metric.pickOneOfMetric().createMeasured()
     me.caption.set('A Metric')
     me.description.set('Some Metric')
     me.source.createWebsite(s => s.url.set('example.com'))
@@ -100,8 +100,8 @@ specify('Expedition with Indicators', () => {
 specify('Indicator without thresholds', () => {
     const e = new Expedition()
     e.mountains.add().create()
-        .indicators.add().pick(0).create(i => {
-            i.metric.pick(0).createMeasured(m => {
+        .indicators.add().pickOneOfIndicator().create(i => {
+            i.metric.pickOneOfMetric().createMeasured(m => {
                 m.measure(new Date('2020-11-12'), 10)
                 m.measure(new Date('2020-11-13'), 3)
             })
@@ -116,19 +116,19 @@ specify('Indicator without thresholds', () => {
 specify('Combined Metric', () => {
     const e = new Expedition()
     e.mountains.add().create()
-        .indicators.add().pick(0).create(i => {
+        .indicators.add().pickOneOfIndicator().create(i => {
             i.good.set(20)
             i.ok.set(10)
-            i.metric.pick(0).createCombined(m => {
+            i.metric.pickOneOfMetric().createCombined(m => {
                 m.formula.set((value, { one, two }, date) => {
                     value.set(
                         one.datumOn(date).get().value.get()
                         + two.datumOn(date).get().value.get())
                 })
-                m.inputs.put('one').pick(0).createMeasured(m => {
+                m.inputs.put('one').pickOneOfMetric().createMeasured(m => {
                     m.measure(new Date('2020-11-12'), 10)
                 })
-                m.inputs.put('two').pick(0).createMeasured(m => {
+                m.inputs.put('two').pickOneOfMetric().createMeasured(m => {
                     m.measure(new Date('2020-11-12'), 3)
                     m.measure(new Date('2020-11-13'), 4)
                 })
@@ -144,10 +144,10 @@ specify('Combined Metric', () => {
 specify('Smoothed Metric', () => {
     const e = new Expedition()
     e.mountains.add().create()
-        .indicators.add().pick(0).create(i => {
-            i.metric.pick(0).createSmoothed(m => {
+        .indicators.add().pickOneOfIndicator().create(i => {
+            i.metric.pickOneOfMetric().createSmoothed(m => {
                 m.window.set(2 * 24 * 3600 * 1000)
-                m.input.pick(0).createMeasured(m => {
+                m.input.pickOneOfMetric().createMeasured(m => {
                     m.measure(new Date('2020-11-12'), 10)
                     m.measure(new Date('2020-11-13'), 11)
                     m.measure(new Date('2020-11-14'), 14)
@@ -168,11 +168,11 @@ specify('Chunked Metric', () => {
 
     const e = new Expedition()
     e.mountains.add().create()
-        .indicators.add().pick(0).create(i => {
-            i.metric.pick(0).createChunked(m => {
+        .indicators.add().pickOneOfIndicator().create(i => {
+            i.metric.pickOneOfMetric().createChunked(m => {
                 m.start.set(daysAgo(24))
                 m.size.set(7 * 24 * 3600 * 1000)
-                measured = m.input.pick(0).createMeasured()
+                measured = m.input.pickOneOfMetric().createMeasured()
             })
         })
 
@@ -200,24 +200,24 @@ specify('Due Metrics', () => {
 
     const e = new Expedition()
     e.mountains.add().create()
-        .indicators.add().pick(0).create()
+        .indicators.add().pickOneOfIndicator().create()
     e.mountains.add().create()
-        .indicators.add().pick(0).create()
-        .metric.pick(0).createSmoothed()
+        .indicators.add().pickOneOfIndicator().create()
+        .metric.pickOneOfMetric().createSmoothed()
 
     const m1 = e.mountains.add().create()
-        .indicators.add().pick(0).create()
-        .metric.pick(0).createMeasured(m => {
+        .indicators.add().pickOneOfIndicator().create()
+        .metric.pickOneOfMetric().createMeasured(m => {
             m.caption.set('One')
             m.frequency.set(2 * 24 * 3600 * 1000)
         })
     e.mountains.add().create()
         .goals.add().create()
         .criteria.add().create()
-        .metric.pick(0).createSmoothed()
-        .input.pick(0).createChunked()
-        .input.pick(0).createCombined()
-        .inputs.put('two').pick(0).createMeasured(m => {
+        .metric.pickOneOfMetric().createSmoothed()
+        .input.pickOneOfMetric().createChunked()
+        .input.pickOneOfMetric().createCombined()
+        .inputs.put('two').pickOneOfMetric().createMeasured(m => {
             m.caption.set('Two')
             m.frequency.set(2 * 24 * 3600 * 1000)
         })
