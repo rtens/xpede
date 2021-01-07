@@ -169,8 +169,8 @@ extend(Measured, Metric)
 class Derived extends Metric {
     constructor() {
         super()
-        this.inputs = Map.of(Metric)
         this.formula = Formula.for(Value.of(Number))
+        this.inputs = Map.of(Metric)
     }
 
     data() {

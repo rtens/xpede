@@ -1,8 +1,4 @@
-- merge Reference into One
-- formula before inputs
-- rename Combined into Derivative
 - Readme with explanations of concepts/UI
-
 - browse through input metrics in dashboard
 - add mission to Expedition
 - maybe add values to Expedition
