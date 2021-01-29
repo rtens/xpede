@@ -78,7 +78,7 @@ class One extends ObjectContainer {
         }
     }
 
-    make(object) {
+    set(object) {
         this.object = object
         return object
     }

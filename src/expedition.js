@@ -29,7 +29,7 @@ class Mountain {
         this.reason = Value.of(String)
 
         this.goals = Many.of(Goal)
-        this.indicators = Many.of(Indicator)
+        this.progress = Many.of(Indicator)
     }
 
     status() {
@@ -38,7 +38,7 @@ class Mountain {
             reason: this.reason.get(),
             goals: this.goals.getAll()
                 .map(g => g.status()),
-            indicators: this.indicators.getAll()
+            progress: this.progress.getAll()
                 .map(i => i.status())
         }
     }
@@ -46,7 +46,7 @@ class Mountain {
     metrics() {
         return [
             ...this.goals.getAll().reduce((acc, g) => [...acc, ...g.metrics()], []),
-            ...this.indicators.getAll().reduce((acc, i) => [...acc, ...i.metrics()], []),
+            ...this.progress.getAll().reduce((acc, i) => [...acc, ...i.metrics()], []),
         ]
     }
 }
@@ -56,7 +56,7 @@ class Goal {
         this.caption = Value.of(String)
         this.description = Value.of(String)
 
-        this.criteria = Many.of(Indicator)
+        this.criteria = Many.of(Gauge)
     }
 
     status() {
@@ -74,7 +74,26 @@ class Goal {
 }
 
 class Indicator {
+
+    status() {
+        return {
+            caption: "string",
+            description: "string",
+            ok: 0,
+            good: 0,
+            metric: null // Metric#status()
+        }
+    }
+
+    metrics() {
+        return []
+    }
+}
+
+class Gauge extends Indicator {
     constructor() {
+        super()
+
         this.caption = Value.of(String)
         this.description = Value.of(String)
         this.ok = Value.of(Number)
@@ -97,6 +116,52 @@ class Indicator {
         return this.metric.ifEither(m => m.metrics(), () => [])
     }
 }
+extend(Gauge, Indicator)
+
+class Target extends Indicator {
+    constructor() {
+        super()
+        
+        this.date = Value.of(Date)
+        this.window = Value.of(Number)
+        this.indicator = One.of(Indicator)
+    }
+
+    status(now = new Date()) {
+        const i = this.indicator.get()
+        const m = i.metric.get()
+
+        const current = m.datumOn(now).get().value.get()
+        
+        const leftOk = i.ok.get() - current
+        const leftGood = i.good.get() - current
+
+        const timeLeft = this.date.get().getTime() - now.getTime()
+
+        const ok = leftOk / timeLeft * this.window.get()
+        const good = leftGood / timeLeft * this.window.get()
+
+        return {
+            caption: "Hit target for " + i.caption.get(),
+            description: "Hit target for " + i.caption.get() + " by " + this.date.get().toISOString(),
+            ok,
+            good,
+            metric: {
+                caption: "Change of " + m.caption.get(),
+                description: "Change of " + m.caption.get() + " over " + this.window.get() / (24*3600*1000) + " days",
+                data: m.data().getAll().map(d => ({
+                    at: d.at.get(),
+                    value: d.value.get() - m.datumOn(new Date(d.at.get().getTime() - this.window.get())).ifThere(a => a.value.get())
+                })).filter(d => !isNaN(d.value))
+            }
+        }
+    }
+
+    metrics() {
+        return this.indicator.ifEither(i => i.metrics(), () => [])
+    }
+}
+extend(Target, Indicator)
 
 class Metric {
     constructor() {

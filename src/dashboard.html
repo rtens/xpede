@@ -99,9 +99,9 @@
             const $indicators = $mountain.find('.indicators')
             $body.on('click', () => new bootstrap.Collapse($indicators[0]))
 
-            if (mountain.indicators.length === 0) $mountain.find('.card-body').remove()
+            if (mountain.progress.length === 0) $mountain.find('.card-body').remove()
 
-            const score = mountain.indicators
+            const score = mountain.progress
                 .map(indicator => renderIndicator($mountain.find('.indicators'), indicator))
                 .reduce((min, score) => Math.min(min, score), Infinity)
 
@@ -279,7 +279,7 @@
                         ].slice(0, Math.random() * 3.5),
                         testGoal("Top of " + name),
                     ],
-                    "indicators": Math.random() < .5 ? [] : [
+                    "progress": Math.random() < .5 ? [] : [
                         testIndicator(name, 'one'),
                         testIndicator(name, 'two'),
                         testIndicator(name, 'three'),

@@ -236,14 +236,14 @@ specify('Reference', () => {
     assert.equal(
         a(new TwoReferences(), o =>
             o.first.create(f => f.foo = 42) &&
-            o.second.make(o.first.get()) &&
+            o.second.set(o.first.get()) &&
             o.second.get()),
         { "foo": 42 })
 
     assert.same(new TwoReferences,
         new TwoReferences(o =>
             o.first.create() &&
-            o.second.make(o.first.get())),
+            o.second.set(o.first.get())),
         { "type": "TwoReferences", "fields": { 
             "first": { "id": "@1", "type": "ReferencedObject", "fields": {} }, 
             "second": "@1" } })
@@ -260,8 +260,8 @@ specify('Reference', () => {
     assert.same(new ThreeReferences,
         new ThreeReferences(o =>
             o.first.create() &&
-            o.second.make(o.first.get()) &&
-            o.third.make(o.first.get())),
+            o.second.set(o.first.get()) &&
+            o.third.set(o.first.get())),
         {
             "type": "ThreeReferences", "fields": {
                 "first": { "id": "@1", "type": "ReferencedObject", "fields": {} },
@@ -281,8 +281,8 @@ specify('Reference', () => {
     assert.same(new ManyReferences,
         new ManyReferences(o =>
             o.first.create() &&
-            o.second.add().make(o.first.get()) &&
-            o.second.add().make(o.first.get())),
+            o.second.add().set(o.first.get()) &&
+            o.second.add().set(o.first.get())),
         { "type": "ManyReferences", "fields": { "first": { "id": "@1", "type": "ReferencedObject", "fields": {} }, "second": ["@1", "@1"] } })
 })
 
