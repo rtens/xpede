@@ -46,8 +46,8 @@ class Value extends ObjectContainer {
         this.object = value
     }
 
-    get() {
-        return this.object
+    get(defaultTo = null) {
+        return this.object || defaultTo
     }
 
     clone() {

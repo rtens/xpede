@@ -21,27 +21,6 @@ class Expedition {
 }
 module.exports = Expedition
 
-function combine(indicators) {
-    const ats = [...new Set(indicators.reduce((acc, i) => [
-        ...acc,
-        ...i.status().getAll().map(s => s.at.get().toISOString())
-    ], []))]
-    ats.sort()
-
-    const status = Many.of(Datum)
-    ats
-        .map(at => new Date(at))
-        .forEach(at => status.add().create(d => {
-            d.at.set(at)
-            d.value.set(Math.min(...indicators
-                .map(i => i.statusOn(at))
-                .filter(s => s.exists())
-                .map(s => s.get().value.get())))
-        }))
-
-    return status
-}
-
 class Datum {
     constructor() {
         this.at = Value.of(Date)
@@ -97,9 +76,9 @@ class Target extends Indicator {
     }
 
     status() {
-        if (!this.ok.exists()) return super.status()
-        if (!this.good.exists()) return super.status()
-        if (!this.metric.exists()) return super.status()
+        if (!this.ok.exists() ||
+            !this.good.exists() ||
+            !this.metric.exists()) return super.status()
 
         return this.metric.get().data().mapTo(Datum, (i, o) => o.create(d => {
             d.at.set(i.at.get())
@@ -122,6 +101,19 @@ class Metric {
     data() {
         return Many.of(Datum)
     }
+
+    datumOn(date) {
+        return this.data()
+            .select(l => l.get().at.get() <= date)
+            .last()
+    }
+
+    dataBetween(start, end) {
+        return this.data()
+            .select(l =>
+                l.get().at.get() > start
+                && l.get().at.get() <= end)
+    }
 }
 
 class Derived extends Metric {
@@ -130,14 +122,151 @@ class Derived extends Metric {
         this.formula = Formula.for(Value.of(Number))
         this.inputs = Map.of(Metric)
     }
+
+    data() {
+        const data = Many.of(Datum)
+        dates(this.inputs.values(), i => i.get().data()).forEach(date => {
+            try {
+                this.formula.execute(date, this._inputMap())
+                    .ifThere(result =>
+                        data.add().create(d => {
+                            d.at.set(date)
+                            d.value.set(result)
+                        })
+                    )
+            } catch (e) {
+                // console.error('Error in [' + this.name.get() + '] for [' + date.toISOString() + ']: ' + e)
+            }
+        })
+        return data
+    }
+
+    _inputMap() {
+        const inputs = {}
+        this.inputs.keys().forEach(k => inputs[k] = this.inputs.at(k).get())
+        return inputs
+    }
 }
 extend(Derived, Metric)
+
+class Smoothed extends Metric {
+    constructor() {
+        super()
+        this.window = One.of(Span)
+        this.input = One.of(Metric)
+    }
+
+    data() {
+        const data = Many.of(Datum)
+        if (!this.input.exists() ||
+            !this.window.exists()) return data
+
+        const window = this.window.get().millis()
+
+        this.input.get().data().getAll().forEach(datum => {
+            const date = datum.at.get()
+            const begin = new Date(date.getTime() - window)
+
+            const values = this.input.get().dataBetween(begin, date).getAll()
+                .map(d => d.value.get())
+
+            data.add().create(d => {
+                d.at.set(date)
+                d.value.set(values.reduce((sum, i) => sum + i, 0) / values.length)
+            })
+        })
+        return data
+    }
+}
+extend(Smoothed, Metric)
+
+class Averaged extends Metric {
+    constructor() {
+        super()
+        this.window = One.of(Span)
+        this.unit = One.of(Span)
+        this.input = One.of(Metric)
+    }
+
+    data() {
+        const data = Many.of(Datum)
+        if (!this.input.exists() ||
+            !this.window.exists() ||
+            !this.unit.exists()) return data
+
+        const window = this.window.get().millis()
+        const unit = this.unit.get().millis()
+
+        this.input.get().data().getAll().forEach(datum => {
+            const date = datum.at.get()
+            const begin = new Date(date.getTime() - window)
+
+            const sum = this.input.get().dataBetween(begin, date).getAll()
+                .reduce((sum, d) => sum + d.value.get(), 0)
+
+            data.add().create(d => {
+                d.at.set(date)
+                d.value.set(sum / window * unit)
+            })
+        })
+        return data
+    }
+}
+extend(Averaged, Metric)
+
+class Difference extends Metric {
+    constructor() {
+        super()
+        this.window = One.of(Span)
+        this.input = One.of(Metric)
+    }
+
+    data() {
+        const data = Many.of(Datum)
+        if (!this.input.exists() ||
+            !this.window.exists()) return data
+
+        const window = this.window.get().millis()
+
+        this.input.get().data().getAll().forEach(datum => {
+            const date = datum.at.get()
+            const begin = new Date(date.getTime() - window)
+            const then = this.input.get().datumOn(begin)
+
+            if (!then.exists()) return
+
+            const diff = this.input.get().datumOn(date).get().value.get() - 
+                then.get().value.get()
+                
+            data.add().create(d => {
+                d.at.set(date)
+                d.value.set(diff)
+            })
+        })
+        return data
+    }
+}
+extend(Difference, Metric)
+
+class Span {
+    constructor() {
+        this.weeks = Value.of(Number)
+        this.days = Value.of(Number)
+        this.hours = Value.of(Number)
+    }
+
+    millis() {
+        return this.hours.get(0) * 3600 * 1000
+            + this.days.get(0) * 24 * 3600 * 1000
+            + this.weeks.get(0) * 7 * 24 * 3600 * 1000
+    }
+}
 
 class Measured extends Metric {
     constructor() {
         super()
         this.facts = Many.of(Datum)
-        this.frequency = Value.of(Number)
+        this.frequency = One.of(Span)
         this.source = One.of(Source)
     }
 
@@ -161,3 +290,32 @@ class Website extends Source {
     }
 }
 extend(Website, Source)
+
+
+
+function combine(indicators) {
+    const status = Many.of(Datum)
+    dates(indicators, i => i.status())
+        .forEach(at => status.add().create(d => {
+            d.at.set(at)
+            d.value.set(Math.min(...indicators
+                .map(i => i.statusOn(at))
+                .filter(s => s.exists())
+                .map(s => s.get().value.get())))
+        }))
+
+    return status
+}
+
+function dates(source, toData) {
+    const map = {}
+    source.forEach(i =>
+        toData(i).getAll().forEach(d =>
+            map[d.at.get().toISOString()] = true
+        )
+    )
+
+    const dates = Object.keys(map)
+    dates.sort()
+    return dates.map(at => new Date(at))
+}

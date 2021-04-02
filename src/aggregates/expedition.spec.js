@@ -99,20 +99,12 @@ specify('Expedition uses worst Goal status', () => {
         })
     )
 
-    assert.equal(e.status().getAll().map(s => s.at.get()), [
-        new Date('2011-12-13'),
-        new Date('2011-12-14'),
-        new Date('2011-12-15'),
-        new Date('2011-12-16'),
-        new Date('2011-12-17'),
-    ])
-
-    assert.equal(e.status().getAll().map(s => s.value.get()), [
-        0.5,
-        0.5,
-        0.4,
-        0.4,
-        0.3
+    assert.equal(e.status().getAll().map(s => [s.at.get(), s.value.get()]), [
+        [new Date('2011-12-13'), 0.5],
+        [new Date('2011-12-14'), 0.5],
+        [new Date('2011-12-15'), 0.4],
+        [new Date('2011-12-16'), 0.4],
+        [new Date('2011-12-17'), 0.3],
     ])
 })
 
@@ -165,20 +157,12 @@ specify('Use worst Location status', () => {
         })
     })
 
-    assert.equal(e.status().getAll().map(s => s.at.get()), [
-        new Date('2011-12-13'),
-        new Date('2011-12-14'),
-        new Date('2011-12-15'),
-        new Date('2011-12-16'),
-        new Date('2011-12-17'),
-    ])
-
-    assert.equal(e.status().getAll().map(s => s.value.get()), [
-        0.5,
-        0.5,
-        0.4,
-        0.4,
-        0.3
+    assert.equal(e.status().getAll().map(s => [s.at.get(), s.value.get()]), [
+        [new Date('2011-12-13'), 0.5],
+        [new Date('2011-12-14'), 0.5],
+        [new Date('2011-12-15'), 0.4],
+        [new Date('2011-12-16'), 0.4],
+        [new Date('2011-12-17'), 0.3],
     ])
 })
 
@@ -265,101 +249,129 @@ specify('Use worst Progress status', () => {
         })
     })
 
-    assert.equal(e.status().getAll().map(s => s.at.get()), [
-        new Date('2011-12-13'),
-        new Date('2011-12-14'),
-        new Date('2011-12-15'),
-        new Date('2011-12-16'),
-        new Date('2011-12-17'),
-    ])
-
-    assert.equal(e.status().getAll().map(s => s.value.get()), [
-        0.5,
-        0.5,
-        0.4,
-        0.4,
-        0.3
+    assert.equal(e.status().getAll().map(s => [s.at.get(), s.value.get()]), [
+        [new Date('2011-12-13'), 0.5],
+        [new Date('2011-12-14'), 0.5],
+        [new Date('2011-12-15'), 0.4],
+        [new Date('2011-12-16'), 0.4],
+        [new Date('2011-12-17'), 0.3],
     ])
 })
 
-specify.skip('Derived Metric', () => {
+specify('Derived Metric', () => {
     const e = new Expedition()
-    e.mountains.add().create()
-        .progress.add().createGauge(i => {
-            i.good.set(20)
-            i.ok.set(10)
-            i.metric.createDerived(m => {
-                m.formula.set((value, { one, two }, date) => {
+    e.summit.create(s =>
+        s.location.add().createTarget(t => {
+            t.good.set(10)
+            t.ok.set(0)
+            t.metric.createDerived(m => {
+                m.formula.set((value, at, { one, two }) => {
                     value.set(
-                        one.datumOn(date).get().value.get()
-                        + two.datumOn(date).get().value.get())
+                        one.datumOn(at).get().value.get()
+                        + two.datumOn(at).get().value.get())
                 })
-                m.inputs.put('one').createMeasured(m => {
-                    m.measure(new Date('2020-11-12'), 10)
-                })
-                m.inputs.put('two').createMeasured(m => {
-                    m.measure(new Date('2020-11-12'), 3)
-                    m.measure(new Date('2020-11-13'), 4)
+
+                m.inputs.put('one').createMeasured(input =>
+                    input.facts.add().create(d => {
+                        d.at.set(new Date('2011-12-13'))
+                        d.value.set(3)
+                    })
+                )
+                m.inputs.put('two').createMeasured(input => {
+                    input.facts.add().create(d => {
+                        d.at.set(new Date('2011-12-14'))
+                        d.value.set(4)
+                    })
+                    input.facts.add().create(d => {
+                        d.at.set(new Date('2011-12-16'))
+                        d.value.set(6)
+                    })
                 })
             })
         })
+    )
 
-    assert.equal(e.status().mountains[0].progress[0].metric.data, [
-        { at: '2020-11-12T00:00:00.000Z', value: 13 },
-        { at: '2020-11-13T00:00:00.000Z', value: 14 },
+    assert.equal(e.status().getAll().map(s => [s.at.get(), s.value.get()]), [
+        [new Date('2011-12-14'), 0.7],
+        [new Date('2011-12-16'), 0.9],
     ])
 })
 
-specify.skip('Smoothed Metric', () => {
+specify('Smoothed Metric', () => {
     const e = new Expedition()
-    e.mountains.add().create()
-        .progress.add().createGauge(i => {
-            i.metric.createSmoothed(m => {
-                m.window.set(2 * 24 * 3600 * 1000)
+    e.summit.create(s =>
+        s.location.add().createTarget(t => {
+            t.good.set(10)
+            t.ok.set(0)
+            t.metric.createSmoothed(m => {
+                m.window.create(w => w.days.set(3))
                 m.input.createMeasured(m => {
-                    m.measure(new Date('2020-11-12'), 10)
-                    m.measure(new Date('2020-11-13'), 11)
-                    m.measure(new Date('2020-11-14'), 14)
+                    m.facts.add().create(d => { d.at.set(new Date('2011-12-13')); d.value.set(4) })
+                    m.facts.add().create(d => { d.at.set(new Date('2011-12-14')); d.value.set(8) })
+                    m.facts.add().create(d => { d.at.set(new Date('2011-12-15')); d.value.set(12) })
+                    m.facts.add().create(d => { d.at.set(new Date('2011-12-16')); d.value.set(7) })
                 })
             })
         })
+    )
 
-    assert.equal(e.status().mountains[0].progress[0].metric.data, [
-        { at: '2020-11-12T00:00:00.000Z', value: 10 },
-        { at: '2020-11-13T00:00:00.000Z', value: 10.5 },
-        { at: '2020-11-14T00:00:00.000Z', value: 12.5 },
+    assert.equal(e.status().getAll().map(s => [s.at.get(), s.value.get()]), [
+        [new Date('2011-12-13'), 0.4],
+        [new Date('2011-12-14'), 0.6],
+        [new Date('2011-12-15'), 0.8],
+        [new Date('2011-12-16'), 0.9],
     ])
 })
 
-specify.skip('Chunked Metric', () => {
-    const daysAgo = d => new Date(new Date(new Date().getTime() - d * 24 * 3600 * 1000).toISOString().substring(0, 10))
-    let measured
-
+specify('Averaged Metric', () => {
     const e = new Expedition()
-    e.mountains.add().create()
-        .progress.add().createGauge(i => {
-            i.metric.createChunked(m => {
-                m.start.set(daysAgo(24))
-                m.size.set(7 * 24 * 3600 * 1000)
-                measured = m.input.createMeasured()
+    e.summit.create(s =>
+        s.location.add().createTarget(t => {
+            t.good.set(10)
+            t.ok.set(0)
+            t.metric.createAveraged(m => {
+                m.window.create(w => w.days.set(4))
+                m.unit.create(u => u.days.set(1))
+                m.input.createMeasured(m => {
+                    m.facts.add().create(d => { d.at.set(new Date('2011-12-13')); d.value.set(12) })
+                    m.facts.add().create(d => { d.at.set(new Date('2011-12-15')); d.value.set(12) })
+                    m.facts.add().create(d => { d.at.set(new Date('2011-12-16')); d.value.set(12) })
+                    m.facts.add().create(d => { d.at.set(new Date('2011-12-18')); d.value.set(8) })
+                })
             })
         })
+    )
 
-    assert.equal(e.status().mountains[0].progress[0].metric.data, [
-        { at: daysAgo(24), value: 0 },
-        { at: daysAgo(17), value: 0 },
-        { at: daysAgo(10), value: 0 },
-        { at: daysAgo(3), value: 0 },
+    assert.equal(e.status().getAll().map(s => [s.at.get(), s.value.get()]), [
+        [new Date('2011-12-13'), 0.3],
+        [new Date('2011-12-15'), 0.6],
+        [new Date('2011-12-16'), 0.9],
+        [new Date('2011-12-18'), 0.8],
     ])
+})
 
-    measured.measure(daysAgo(23), 1)
-    measured.measure(daysAgo(17), 2)
-    measured.measure(daysAgo(9), 4)
+specify('Difference Metric', () => {
+    const e = new Expedition()
+    e.summit.create(s =>
+        s.location.add().createTarget(t => {
+            t.good.set(10)
+            t.ok.set(0)
+            t.metric.createDifference(m => {
+                m.window.create(w => w.days.set(3))
+                m.input.createMeasured(m => {
+                    m.facts.add().create(d => { d.at.set(new Date('2011-12-13')); d.value.set(6) })
+                    m.facts.add().create(d => { d.at.set(new Date('2011-12-15')); d.value.set(7) })
+                    m.facts.add().create(d => { d.at.set(new Date('2011-12-16')); d.value.set(8) })
+                    m.facts.add().create(d => { d.at.set(new Date('2011-12-17')); d.value.set(9) })
+                    m.facts.add().create(d => { d.at.set(new Date('2011-12-19')); d.value.set(9) })
+                })
+            })
+        })
+    )
 
-    assert.equal(e.status().mountains[0].progress[0].metric.data, [
-        { at: daysAgo(24), value: 0 },
-        { at: daysAgo(17), value: 3 },
-        { at: daysAgo(10), value: 0 },
-        { at: daysAgo(3), value: 4 },
+    assert.equal(e.status().getAll().map(s => [s.at.get(), s.value.get()]), [
+        [new Date('2011-12-16'), 0.2],
+        [new Date('2011-12-17'), 0.3],
+        [new Date('2011-12-19'), 0.1],
     ])
 })
