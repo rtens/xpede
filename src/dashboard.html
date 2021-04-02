@@ -11,55 +11,61 @@
     <title>xpede</title>
 </head>
 
-<body style="overflow: scroll;">
-    <div>
-        <div class="dashboard row m-3">
-            <div class="mountain col" style="min-width: 26em; max-width: 52.5em;">
+<body style="margin: 1em; overflow: scroll;">
+    <div class="dashboard">
 
-                <div class="mountain-info card text-white bg-secondary mb-3">
-                    <div class="card-header">
-                        <img src="../assets/icons/mountain.png" style="height: 6em" class="icon float-start mr-3">
-                        <h1 class="name">Mountain Name</h1>
-                        <p class="reason card-title">Reason to climb</p>
-                    </div>
+    </div>
 
-                    <div class="card-body collapse show">
-                        <div class="indicators collapse show">
-                            <div class="indicator card text-white bg-secondary mb-3">
-                                <div class="card-header">
-                                    <img src="../assets/icons/indicator.png" style="height: 4em"
-                                        class="icon float-start mr-3">
-                                    <h3 class="caption">Indicator caption</h3>
-                                    <p class="description">Indicator description</p>
-                                </div>
-                                <div class="card-body">
-                                    <h5 class="value card-title float-end">current value</h5>
-                                    <h5 class="metric card-title" title="Metric description">Metric caption</h5>
-                                    <div class="graph">
-                                        <canvas width="100" height="150"></canvas>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+    <div class="prototypes">
+
+        <div class="expedition card text-white bg-secondary mb-3">
+            <div class="card-header">
+                <img src="../assets/icons/expedition.png" style="height: 4em; margin-right: 1em;"
+                    class="icon float-start">
+                <h1 class="name">Expedition Name</h1>
+            </div>
+
+            <div class="card-body collapse show">
+                <div class="clearfix">
+                    <img src="../assets/icons/stakeholders.png" style="height: 2em; margin-right: 0.5em;"
+                        title="Stakeholders" class="icon float-start">
+                    <div class="stakeholders">Some stakeholders</div>
+                </div>
+                <div class="clearfix">
+                    <img src="../assets/icons/participants.png" style="height: 2em; margin-right: 0.5em;"
+                        title="Participants" class="icon float-start">
+                    <div class="participants">Some participants</div>
+                </div>
+                <div class="history">
+                    <canvas width="100" height="150"></canvas>
                 </div>
 
-                <div class="goals collapse show">
-                    <div class="goal">
-                        <div class="goal-info card text-white bg-secondary mb-3">
-                            <div class="card-header">
-                                <img src="../assets/icons/summit.png" style="height: 4em" class="icon float-start mr-3">
-                                <h2 class="caption">Goal caption</h2>
-                                <p class="description">Goal description</p>
-                            </div>
-
-                            <div class="criteria card-body collapse show"></div>
-                        </div>
-                    </div>
-                </div>
-
+                <div class="goals"></div>
             </div>
         </div>
+
+        <div class="indicator card text-white bg-secondary mt-3">
+            <div class="card-header">
+                <img src="../assets/icons/summit.png" style="height: 2.5em; margin-right: .5em;"
+                    class="icon float-start">
+                <h2 class="name">Summit Name</h2>
+            </div>
+
+            <div class="card-body collapse show">
+                <p class="description">Some description</p>
+                <div class="extra"></div>
+                <div class="history">
+                    <canvas width="100" height="150"></canvas>
+                </div>
+                <div class="children"></div>
+            </div>
+        </div>
+
+        <div class="target">
+            <h5>Good: <span class="good"></span></h5>
+            <h5>OK: <span class="ok"></span></h5>
+        </div>
+
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js"
@@ -69,125 +75,152 @@
         integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
 
     <script>
-        const model = /**STATUS*/testStatus()/*STATUS**/
+        const expedition = /**EXPEDITION*/testExpedition()/*EXPEDITION**/
 
         const $dashboard = $('.dashboard')
-        const $_goal = $('.goal').remove()
-        const $_indicator = $('.indicator').remove()
-        const $_mountain = $('.mountain').remove()
+        const $proto = $('.prototypes').remove()
 
-        document.title = model.name
+        document.title = "Status of " + expedition.name
 
         const then = []
-        model.mountains.forEach(renderMountain)
+        $dashboard.append(renderExpedition(expedition))
         then.forEach(t => t())
         $('.collapse.show').removeClass('show')
 
-        function renderMountain(mountain) {
-            $mountain = $_mountain.clone()
-            $dashboard.append($mountain)
-            $mountain.find('.mountain-info .name').html(mountain.name)
-            $mountain.find('.mountain-info .reason').html(mountain.reason)
-
-            const $body = $mountain.find('.card-body')
-            const $goals = $mountain.find('.goals')
-            $mountain.find('.mountain-info .card-header').on('click', () => {
-                new bootstrap.Collapse($goals[0])
-                new bootstrap.Collapse($body[0])
-            })
-
-            const $indicators = $mountain.find('.indicators')
-            $body.on('click', () => new bootstrap.Collapse($indicators[0]))
-
-            if (mountain.progress.length === 0) $mountain.find('.card-body').remove()
-
-            const score = mountain.progress
-                .map(indicator => renderIndicator($mountain.find('.indicators'), indicator))
-                .reduce((min, score) => Math.min(min, score), Infinity)
-
-            const goals = mountain.goals.reverse()
-                .map((goal, i) => renderGoal($mountain, goal, i > 0))
-                .reduce((min, score) => Math.min(min, score), Infinity)
-
-            colorCode($mountain.find('.mountain-info'), score < Infinity ? score : goals)
+        function proto(of) {
+            return $proto.find('.' + of).clone()
         }
 
-        function renderGoal($mountain, goal, isStopover) {
-            $goal = $_goal.clone()
-            $mountain.find('.goals').append($goal)
+        function renderExpedition(expedition) {
+            $expedition = proto('expedition')
 
-            if (isStopover) $goal.find('img').prop('src', '../assets/icons/stopover.png')
+            $expedition.find('.name').html(expedition.name)
 
-            $goal.find('.goal-info .caption').html(goal.caption)
-            $goal.find('.goal-info .description').html(goal.description)
+            $expedition.find('.stakeholders').html(printParty(expedition.stakeholders))
+            $expedition.find('.participants').html(printParty(expedition.participants))
 
-            const $criteria = $goal.find('.criteria')
-            $goal.on('click', () => {
-                new bootstrap.Collapse($criteria[0])
-            })
+            const $body = $expedition.find('.card-body')[0]
+            $expedition.find('.card-header').on('click', () =>
+                new bootstrap.Collapse($body))
 
-            if (goal.criteria.length === 0) $goal.find('.criteria').remove()
+            colorCode($expedition, expedition.history)
+            then.push(() => drawGraph($expedition.find('.history'), expedition.history))
 
-            const score = goal.criteria
-                .map(indicator => renderIndicator($goal.find('.criteria'), indicator, true))
-                .reduce((min, score) => Math.min(min, score), Infinity)
+            $expedition.find('.goals').append(renderAny(expedition.summit, 'summit'))
+            expedition.waypoints.forEach(waypoint =>
+                $expedition.find('.goals').append(renderAny(waypoint, 'waypoint')))
 
-            colorCode($goal.find('.goal-info'), score)
-
-            return score
+            return $expedition
         }
 
-        function renderIndicator($container, indicator, isCriterion) {
-            $indicator = $_indicator.clone()
-            $container.append($indicator)
+        function printParty(party) {
+            return (party.name
+                + (party.members
+                    ? ' (' + party.members.map(m => printParty(m)).join(', ') + ')'
+                    : '')).trim()
+        }
 
-            if (isCriterion) $indicator.find('img').prop('src', '../assets/icons/criterion.png')
+        function renderAny(indicator, role) {
+            switch (indicator.type) {
+                case 'goal': return renderGoal(indicator, role)
+                case 'target': return renderTarget(indicator, role)
+                default: throw new Error('Unknown type: ' + indicator)
+            }
+        }
 
-            $indicator.find('.caption').html(indicator.caption)
+        function renderIndicator(indicator, role) {
+            $indicator = proto('indicator')
+
+            $indicator.find('img').prop('src', '../assets/icons/' + role + '.png')
+            $indicator.find('.name').html(indicator.name)
             $indicator.find('.description').html(indicator.description)
 
-            if (!indicator.metric) {
-                $indicator.find('.card-body').remove()
-                return -Infinity
-            }
+            const $body = $indicator.find('.card-body')[0]
+            $indicator.find('.card-header').on('click', () =>
+                new bootstrap.Collapse($body))
 
-            return renderMetric($indicator, indicator.ok, indicator.good, indicator.metric)
+            colorCode($indicator, indicator.history)
+            const $history = $indicator.find('.history')
+            then.push(() => drawGraph($history, indicator.history))
+
+            return $indicator
         }
 
-        function renderMetric($indicator, ok, good, metric) {
-            $indicator.find('.metric').html(metric.caption)
-            $indicator.find('.metric').prop('title', metric.description)
+        function renderGoal(goal, role) {
+            const $goal = renderIndicator(goal, role)
 
-            const status = metric.data[metric.data.length - 1]
-            if (!status) {
-                $indicator.find('.value').html('')
-                $indicator.find('.graph').html('ok: ' + ok + '<br>good: ' + good)
-                return -Infinity
-            }
+            const $children = $goal.find('.children').first()
+            goal.progress.forEach(indicator =>
+                $children.append(renderAny(indicator, 'progress')))
+            goal.location.forEach(indicator =>
+                $children.append(renderAny(indicator, 'location')))
 
-            let score = -Infinity
-            if (ok !== null && good !== null) score = (status.value - ok) / (good - ok)
-
-            colorCode($indicator, score)
-            $indicator.find('.value').html(Math.round(status.value * 100) / 100)
-
-            const $graph = $indicator.find('.graph')
-            then.push(() => drawGraph($graph, ok, good, metric.data))
-
-            return score
-
+            return $goal
         }
 
-        function drawGraph($graph, ok, good, data) {
+        function renderTarget(target, role) {
+            const $target = renderIndicator(target, role)
+
+            const $extra = proto('target')
+            $target.find('.extra').first().append($extra)
+
+            $extra.find('.ok').html(target.ok)
+            $extra.find('.good').html(target.good)
+
+            return $target
+        }
+
+        // function renderIndicator($container, indicator, isCriterion) {
+        //     $indicator = $_indicator.clone()
+        //     $container.append($indicator)
+
+        //     if (isCriterion) $indicator.find('img').prop('src', '../assets/icons/criterion.png')
+
+        //     $indicator.find('.caption').html(indicator.caption)
+        //     $indicator.find('.description').html(indicator.description)
+
+        //     if (!indicator.metric) {
+        //         $indicator.find('.card-body').remove()
+        //         return -Infinity
+        //     }
+
+        //     return renderMetric($indicator, indicator.ok, indicator.good, indicator.metric)
+        // }
+
+        // function renderMetric($indicator, ok, good, metric) {
+        //     $indicator.find('.metric').html(metric.caption)
+        //     $indicator.find('.metric').prop('title', metric.description)
+
+        //     const status = metric.data[metric.data.length - 1]
+        //     if (!status) {
+        //         $indicator.find('.value').html('')
+        //         $indicator.find('.graph').html('ok: ' + ok + '<br>good: ' + good)
+        //         return -Infinity
+        //     }
+
+        //     let score = -Infinity
+        //     if (ok !== null && good !== null) score = (status.value - ok) / (good - ok)
+
+        //     colorCode($indicator, score)
+        //     $indicator.find('.value').html(Math.round(status.value * 100) / 100)
+
+        //     const $graph = $indicator.find('.graph')
+        //     then.push(() => drawGraph($graph, ok, good, metric.data))
+
+        //     return score
+
+        // }
+
+        function drawGraph($container, data) {
             const fontSize = 20
             const padding = fontSize * 1.5
             const margin = 5
-            const window = 8 * 7 * 24 * 3600 * 1000
+            const window = expedition.weeks * 7 * 24 * 3600 * 1000
 
-            const $canvas = $graph.find('canvas')
+            const $canvas = $container.find('canvas')
             const ctx = $canvas[0].getContext("2d");
 
-            const width = $graph.width() - margin
+            const width = $container.width() - margin
             const height = $canvas.prop('height')
             $canvas.prop('width', width + margin)
 
@@ -198,149 +231,163 @@
 
             const now = new Date()
             const start = new Date(now.getTime() - window)
-            const inWindow = data.filter(s => new Date(s.at) >= start)
 
-            const norm = (ok !== null && good !== null)
-                ? value => (value - ok) / (good - ok)
-                : value => value
-
-            const max = inWindow.reduce((acc, i) => Math.max(acc, norm(i.value)), 1)
-            const min = inWindow.reduce((acc, i) => Math.min(acc, norm(i.value)), 0)
+            const inWindow = data.filter(s => new Date(s.at) >= start).map(s => s.score)
+            const max = inWindow.reduce((acc, s) => Math.max(acc, s), 1)
+            const min = inWindow.reduce((acc, s) => Math.min(acc, s), 0)
 
             const dx = width / (now - start)
             const dy = (height - padding * 2) / (max - min)
 
             const x = date => (date - start) * dx
-            const y = normalized => height - padding - (normalized - min) * dy
+            const y = score => height - padding - (score - min) * dy
 
             ctx.lineWidth = 9
             ctx.beginPath()
             data.forEach((status, i) =>
                 (i ? ctx.lineTo : ctx.moveTo)
-                    .call(ctx, x(new Date(status.at)), y(norm(status.value))))
+                    .call(ctx, x(new Date(status.at)), y(status.score)))
             ctx.stroke()
 
             data.forEach(status => {
                 ctx.beginPath();
-                ctx.arc(x(new Date(status.at)), y(norm(status.value)), 6, 0, 2 * Math.PI, false);
+                ctx.arc(x(new Date(status.at)), y(status.score), 6, 0, 2 * Math.PI, false);
                 ctx.fill();
             })
 
-            const format = i => Math.round(i * 10) / 10
-            const write = (value, x1, y1, offset = fontSize) => ctx.fillText(value, x(x1) - 2, y(y1) + offset)
+            ctx.lineWidth = 3;
             const stroke = (x1, y1, x2, y2) => {
                 ctx.beginPath()
                 ctx.moveTo(x(x1), y(y1))
                 ctx.lineTo(x(x2), y(y2))
                 ctx.stroke()
             }
+            stroke(start, 0, now, 0)
+            stroke(start, 1, now, 1)
 
-            ctx.lineWidth = 3;
-
-            if (good !== null) {
-                stroke(start, 1, now, 1)
-                write('good ' + format(good), now, 1, 10 - fontSize)
-            } else {
-                stroke(start, max, now, max)
-                write('max ' + format(max), now, max, 10 - fontSize)
+            for (let w = start.getTime(); w <= now.getTime(); w += 7 * 24 * 3600 * 1000) {
+                stroke(new Date(w), 5 / dy, new Date(w), -5 / dy)
             }
 
-            if (ok !== null) {
-                stroke(start, 0, now, 0)
-                write('ok ' + format(ok), now, 0)
+            // const write = (value, x1, y1, offset = fontSize) => ctx.fillText(value, x(x1) - 2, y(y1) + offset)
 
-                for (let w = start.getTime(); w <= now.getTime(); w += 7 * 24 * 3600 * 1000) {
-                    stroke(new Date(w), 5 / dy, new Date(w), -5 / dy)
-                }
-            } else {
-                stroke(start, min, now, min)
-                write('min ' + format(min), now, min)
-            }
+
+            // const format = n => Math.round(n * 10) / 10
+            // if (good !== null) {
+            //     stroke(start, 1, now, 1)
+            //     write('good ' + format(good), now, 1, 10 - fontSize)
+            // } else {
+            //     stroke(start, max, now, max)
+            //     write('max ' + format(max), now, max, 10 - fontSize)
+            // }
+
+            // if (ok !== null) {
+            //     stroke(start, 0, now, 0)
+            //     write('ok ' + format(ok), now, 0)
+
+            // } else {
+            //     stroke(start, min, now, min)
+            //     write('min ' + format(min), now, min)
+            // }
         }
 
-        function colorCode($element, score) {
-            if (score === Infinity || score === -Infinity) return
+        function colorCode($element, history) {
+            if (history.length == 0) return
+
+            const score = history[history.length - 1].score
             if (score >= 1) return $element.addClass('bg-success')
             if (score < 0) return $element.addClass('bg-danger')
             else return $element.addClass('bg-warning')
         }
 
-        function testStatus() {
+        function testExpedition() {
+            const weeks = 8
 
-            function testMountain(name) {
+            return {
+                weeks,
+                name: 'Foo',
+                participants: {
+                    name: 'Team Bar',
+                    members: [
+                        { name: 'John' },
+                        { name: 'Peter' },
+                        { name: 'Jane' }]
+                },
+                stakeholders: {
+                    name: 'James'
+                },
+                summit: testSummit('One'),
+                waypoints: [
+                    testGoal('Two'),
+                    testGoal('Three'),
+                    testGoal('Four'),
+                    testGoal('Five'),
+                    testGoal('Six')
+                ].slice(0, Math.random() * 4 + 2),
+                history: testHistory()
+            }
+
+            function testSummit(name) {
                 return {
-                    "name": name,
-                    "reason": "Because " + name.toLowerCase(),
-                    "goals": [
-                        ...[
-                            testGoal("Stopover one of " + name),
-                            testGoal("Stopover two of " + name),
-                            testGoal("Stopover three of " + name)
-                        ].slice(0, Math.random() * 3.5),
-                        testGoal("Top of " + name),
-                    ],
-                    "progress": Math.random() < .5 ? [] : [
-                        testIndicator(name, 'one'),
-                        testIndicator(name, 'two'),
-                        testIndicator(name, 'three'),
-                        testIndicator(name, 'four'),
-                        testIndicator(name, 'five'),
-                    ].slice(0, Math.random() * 3.5 + 2)
+                    type: 'goal',
+                    name,
+                    description: 'I am number ' + name.toLowerCase(),
+                    location: [
+                        testGoal('Goal one'),
+                        testGoal('Goal two'),
+                        testGoal('Goal three')
+                    ].slice(0, Math.random() * 2 + 2),
+                    progress: [],
+                    history: testHistory()
                 }
             }
 
             function testGoal(name) {
                 return {
-                    "caption": name,
-                    "description": "I have reached " + name,
-                    "criteria": [
-                        testIndicator(name, 'one'),
-                        testIndicator(name, 'two'),
-                        testIndicator(name, 'three'),
-                    ]
+                    type: 'goal',
+                    name,
+                    description: 'I am number ' + name.toLowerCase(),
+                    location: [
+                        name == 'One'
+                            ? testGoal('Goal one of ' + name)
+                            : testTarget('Location one of ' + name),
+                        testTarget('Location two of ' + name),
+                        testTarget('Location three of ' + name)
+                    ].slice(0, Math.random() * 2 + 2),
+                    progress: [
+                        testTarget('Progress one of ' + name),
+                        testTarget('Progress two of ' + name),
+                        testTarget('Progress three of ' + name),
+                    ].slice(0, Math.random() < .4 ? 0 : Math.random() * 2 + 2),
+                    history: testHistory()
                 }
             }
 
-            function testIndicator(parent, name) {
-                const ok = Math.random() > .1 ? Math.random() * 10 : null
-                const good = Math.random() > .1 ? Math.random() * 20 + 15 : null
-
+            function testTarget(name) {
                 return {
-                    "caption": "Be " + name + " with " + parent,
-                    "description": "Be a " + name + " not a foo",
-                    "ok": ok,
-                    "good": good,
-                    "metric": {
-                        "caption": name + " of " + parent + " Metric",
-                        "description": "Some Metric for " + name + " of " + parent,
-                        "data": testData(ok, good)
-                    }
+                    type: 'target',
+                    name,
+                    description: 'I have reached ' + name,
+                    ok: Math.round(Math.random() * 12),
+                    good: Math.round(Math.random() * 21 + 12),
+                    history: testHistory(),
+                    metric: testMetric()
                 }
             }
 
-            function testData(ok, good) {
-                const data = []
-                for (let i = Math.random() * 7; i < Math.random() * 60 + 20; i += Math.random() * 4 + 3) {
-                    const value = Math.random() * 40 - 10
-                    data.unshift({
-                        "at": new Date(new Date().getTime() - i * 24 * 3600 * 1000),
-                        "value": value,
-                        "score": (ok !== null && good !== null) ? (value - ok) / (good - ok) : null
+            function testHistory(ok, good) {
+                const history = []
+                for (let daysAgo = Math.random() * 7; daysAgo < Math.random() * weeks * 14 + 14; daysAgo += Math.random() * 4 + 3) {
+                    history.unshift({
+                        at: new Date(new Date().getTime() - daysAgo * 24 * 3600 * 1000),
+                        score: Math.random() * 4 - 1
                     })
                 }
-                return data
+                return history
             }
 
-            return {
-                "name": "Foo",
-                "mountains": [
-                    testMountain('One'),
-                    testMountain('Two'),
-                    testMountain('Three'),
-                    testMountain('Four'),
-                    testMountain('Five'),
-                    testMountain('Six'),
-                ].slice(0, Math.random() * 4.5 + 2)
+            function testMetric() {
+                // TODO
             }
         }
     </script>

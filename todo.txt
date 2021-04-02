@@ -1,6 +1,3 @@
-- Readme with explanations of concepts/UI
-- browse through input metrics in dashboard
-- add mission to Expedition
-- maybe add values to Expedition
-- visualize Expedition with mission (and maybe values) and status
-- separate summit from waypoints
+- build personal expedition
+- add facts with CLI app
+- build dashboard of multiple expeditions

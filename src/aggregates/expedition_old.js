@@ -1,4 +1,4 @@
-const { Value, One, Many, Map, Formula, extend } = require('./model')
+const { Value, One, Many, Map, Formula, extend } = require('../model')
 
 class Expedition {
     constructor() {

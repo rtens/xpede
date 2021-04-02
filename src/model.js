@@ -141,6 +141,12 @@ class Many extends Container {
         return subset
     }
 
+    mapTo(type, mapper) {
+        const mapped = Many.of(type)
+        this.items.forEach(i => mapper(i.get(), mapped.add()))
+        return mapped
+    }
+
     getAll() {
         return this.all().map(i => i.get())
     }

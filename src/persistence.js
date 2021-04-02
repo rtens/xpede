@@ -1,4 +1,5 @@
-fs = require('fs');
+const fs = require('fs')
+const path = require('path')
 
 class Storing {
     constructor(object) {
@@ -7,6 +8,7 @@ class Storing {
     }
 
     toFile(filename) {
+        fs.mkdir(path.dirname(filename), { recursive: true }, (err) => { if (err) throw err })
         fs.writeFileSync(filename, this.asString());
     }
 
@@ -167,24 +169,7 @@ class LoadingRegistry {
     }
 }
 
-class Dashboard {
-    constructor(expedition) {
-        this.expedition = expedition
-    }
-
-    generate(filename) {
-        this._insert('src/dashboard.html', this.expedition.status(), filename)
-    }
-
-    _insert(input, model, output) {
-        const template = fs.readFileSync(input, 'utf8')
-        fs.writeFileSync(output, template
-            .replace(/\/\*\*STATUS\*\/.*\/\*STATUS\*\*\//, JSON.stringify(model)))
-    }
-}
-
 module.exports = {
     Storing,
-    Loading,
-    Dashboard
+    Loading
 }

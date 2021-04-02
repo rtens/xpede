@@ -1,19 +1,22 @@
 const { Storing, Loading } = require('./persistence')
 
 function specify(name, tests) {
+    if (!tests) return console.log('\n? ' + name)
+
     try {
         tests()
+        console.log('\n✓ ' + name)
     } catch (e) {
         if (e.message.startsWith('Expected')) {
             const line = e.stack.split('\n').find(l => l.trim().startsWith('at ') && !l.split(':')[0].endsWith('/spec.js'))
-            console.error('\n[' + name + '] failed ' + line.trim() + '\n' + e.message)
+            console.error('\n❌ ' + name + '\n' + line.trim() + '\n\n' + e.message + '\n')
         } else {
-            console.error('\n[' + name + '] failed\n\n' + e.stack)
+            console.error('\n❌ ' + name + '\n\n' + e.stack + '\n')
         }
     }
 }
 
-specify.skip = name => console.log('\n[' + name + '] skipped')
+specify.skip = name => console.log('\n> ' + name)
 
 function equal(actual, expected) {
     if (JSON.stringify(actual) != JSON.stringify(expected))
