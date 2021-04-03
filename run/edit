@@ -1,0 +1,2 @@
+#!/bin/bash
+cd src; AGGREGATE=$1 FILE=../store/$1/$2.json node -i -e "$(< editor.js)"

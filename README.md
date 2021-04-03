@@ -2,42 +2,61 @@
 
 A simple tool to help you define and track your goals.
 
+To simply view the dashboard, open the file `out/dashboard.html` in a browser.
+
 ## Installation
 
-You need to have [Node.js](https://nodejs.org/) installed.
+To make any changes, you need to have [Node.js](https://nodejs.org/) installed.
 
-Make sure `edit` is executable
+Make sure the application commands are executable
 
 ```
-chmod +x edit
+chmod +x run/*
+```
+
+Make sure everything is working by running the test suite
+
+```
+run/test
 ```
 
 ## Usage
 
+### Creating and editing an Expedition
+
 To edit an Expedition named `first` use
 
 ```
-./edit first
+run/edit expedition first
 ```
 
-This starts the node REPL with the loaded or created Expedition assigned to the variable `e`.
+This starts the node REPL with the loaded or created Expedition assigned to the variable `$`.
 
-You can now edit the Expedition, i.e. add a Mountain with a Goal:
-
-```
-e.name.set('My First Expedition')
-
-m = e.mountains.add().create()
-m.name.set('Health')
-
-g = m.goals.add().create()
-g.caption.set('Be healthy')
-```
-
-To save the Expedition and create its Dashboards use
+You can now edit the Expedition, e.g. give it a name and define its Summit:
 
 ```
-e.save()
+$.name.set('My First Expedition')
+
+s = $.summit.create()
+s.name.set('Be healthy')
 ```
 
-The expedition is now saved as `store/first.json` and the Dashboard can be found in `out/first.html`.
+To save the Expedition use
+
+```
+save()
+```
+
+You can quit the editor by pressing the key combination `Ctrl + D`.
+
+The expedition is now saved as `store/expedition/first.json`.
+
+### Creating and updating the dashboard
+
+To create a new and update an existing dashboard, use the following command
+
+```
+run/dashboard
+```
+
+This will create the file `out/dashboard.html` containing all Expeditions stored in `store/expedition`.

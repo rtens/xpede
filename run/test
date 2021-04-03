@@ -1,0 +1,2 @@
+#!/bin/bash
+for f in $(find src -name *.spec.js); do echo "--$f"; node $f; done

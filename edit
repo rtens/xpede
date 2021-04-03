@@ -1,2 +1,0 @@
-#!/bin/bash
-FILE=$1 AGGREGATE=$2 node -i -e "$(< editor.js)"

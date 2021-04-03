@@ -8,8 +8,8 @@ class Storing {
     }
 
     toFile(filename) {
-        fs.mkdir(path.dirname(filename), { recursive: true }, (err) => { if (err) throw err })
-        fs.writeFileSync(filename, this.asString());
+        fs.mkdirSync(path.dirname(filename), { recursive: true })
+        fs.writeFileSync(filename, this.asString())
     }
 
     asString() {
