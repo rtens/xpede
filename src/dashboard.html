@@ -106,9 +106,9 @@
             const $status = $expedition.find('.status')
             then.push(() => drawGraph($status, expedition.status))
 
-            $expedition.find('.goals').append(renderAny(expedition.summit, 'summit'))
             expedition.waypoints.forEach(waypoint =>
-                $expedition.find('.goals').append(renderAny(waypoint, 'waypoint')))
+                $expedition.find('.goals').prepend(renderAny(waypoint, 'waypoint')))
+            $expedition.find('.goals').prepend(renderAny(expedition.summit, 'summit'))
 
             return $expedition
         }
