@@ -20,34 +20,42 @@ function toDashboard(expeditions) {
 function mapExpedition(e) {
     return {
         name: e.name.get(),
-        summit: mapIndicator(e.summit),
-        waypoints: e.waypoints.all().map(mapIndicator),
-        status: e.status().getAll().map(mapDatum)
+        summit: mapSignal(e.summit),
+        waypoints: e.waypoints.all().map(mapSignal),
+        status: e.status().getAll().map(mapStatus)
     }
 }
 
-function mapIndicator(indicator) {
-    if (!indicator.exists()) return null
-    const i = indicator.get()
+function mapSignal(signal) {
+    if (!signal.exists()) return null
+    const s = signal.get()
 
     const mapped = {
-        type: i.constructor.name,
-        name: i.name.get(),
-        description: i.description.get(),
-        status: i.status().getAll().map(mapDatum)
+        type: s.constructor.name,
+        name: s.name.get(),
+        description: s.description.get(),
+        status: s.status().getAll().map(mapStatus)
     }
 
     switch (mapped.type) {
-        case 'Goal': return mapGoal(i, mapped)
-        case 'Target': return mapTarget(i, mapped)
+        case 'Goal': return mapGoal(s, mapped)
+        case 'Target': return mapTarget(s, mapped)
     }
 }
 
 function mapGoal(g, indicator) {
     return {
         ...indicator,
-        location: g.location.all().map(mapIndicator),
-        progress: g.progress.all().map(mapIndicator)
+        coordinates: g.coordinates.all().map(mapCoordinate),
+        pace: g.pace.all().map(mapSignal),
+        subs: g.subs.all().map(mapSignal)
+    }
+}
+
+function mapCoordinate(coordinate) {
+    return {
+        locked: coordinate.get().locked.get(false),
+        indicator: mapSignal(coordinate.get().indicator)
     }
 }
 
@@ -59,10 +67,10 @@ function mapTarget(t, indicator) {
     }
 }
 
-function mapDatum(d) {
+function mapStatus(d) {
     return {
         at: d.at.get().toISOString(),
-        value: d.value.get()
+        score: d.score.get()
     }
 }
 

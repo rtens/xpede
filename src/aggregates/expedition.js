@@ -3,15 +3,44 @@ const Party = require('./party')
 
 let cache = false
 
-class Expedition {
+class Signal {
     constructor() {
         this.name = Value.of(String)
+        this.description = Value.of(String)
+    }
 
-        this.stakeholders = Many.of(Party)
-        this.participants = Many.of(Party)
+    status() {
+        return Many.of(Status)
+    }
+
+    statusOn(date) {
+        if (!this._statusOn) this._statusOn = {}
+        if (cache && this._statusOn[date]) return this._statusOn[date]
+
+        this._statusOn[date] = this.status()
+            .select(l => l.get().at.get() <= date)
+            .last()
+
+        return this._statusOn[date]
+    }
+}
+
+class Status {
+    constructor() {
+        this.at = Value.of(Date)
+        this.score = Value.of(Number)
+    }
+}
+
+class Expedition extends Signal {
+    constructor() {
+        super()
 
         this.summit = One.of(Goal)
         this.waypoints = Many.of(Goal)
+
+        this.stakeholders = Many.of(Party)
+        this.participants = Many.of(Party)
     }
 
     status() {
@@ -31,62 +60,42 @@ class Expedition {
 }
 module.exports = Expedition
 
-class Datum {
-    constructor() {
-        this.at = Value.of(Date)
-        this.value = Value.of(Number)
-    }
-}
-
-class Indicator {
-    constructor() {
-        this.name = Value.of(String)
-        this.description = Value.of(String)
-    }
-
-    status() {
-        return Many.of(Datum)
-    }
-
-    statusOn(at) {
-        if (!this._statusOn) this._statusOn = {}
-        if (cache && this._statusOn[at]) return this._statusOn[at]
-
-        const status = this.status()
-        if (status.isEmpty()) return One.of(Datum)
-
-        this._statusOn[at] = status.all()
-            .filter(s => s.get().at.get() <= at)
-            .reduce((found, next) =>
-                found.get().at.get() > next.get().at.get() ? found : next,
-                status.at(0))
-
-        return this._statusOn[at]
-    }
-}
-
-class Goal extends Indicator {
+class Goal extends Signal {
     constructor() {
         super()
-        this.location = Many.of(Indicator)
-        this.progress = Many.of(Indicator)
+
+        this.coordinates = Many.of(Coordinate)
+        this.pace = Many.of(Indicator)
+        this.subs = Many.of(Goal)
     }
 
     status() {
         if (cache && this._status) return this._status
 
-        if (!this.progress.isEmpty()) {
-            this._status = combine(this.progress.getAll())
-        } else if (!this.location.isEmpty()) {
-            this._status = combine(this.location.getAll())
-        } else {
-            this._status = super.status()
-        }
+        this._status = combine([
+            ...this.subs.getAll(),
+            ...this.pace.getAll(),
+            ...this.coordinates.getAll()
+                .filter(c => c.locked.get() && c.indicator.exists())
+                .map(c => c.indicator.get())
+        ])
 
         return this._status
     }
 }
-extend(Goal, Indicator)
+
+class Coordinate {
+    constructor() {
+        this.locked = Value.of(Boolean)
+        this.indicator = One.of(Indicator)
+    }
+}
+
+class Indicator extends Signal {
+    constructor() {
+        super()
+    }
+}
 
 class Target extends Indicator {
     constructor() {
@@ -105,10 +114,12 @@ class Target extends Indicator {
             !this.metric.exists()) {
             this._status = super.status()
         } else {
-            this._status = this.metric.get().data().mapTo(Datum, (i, o) => o.create(d => {
-                d.at.set(i.at.get())
-                d.value.set(this.score(i.value))
-            }))
+            this._status = this.metric.get().data()
+                .mapTo(Status, (i, o) =>
+                    o.create(d => {
+                        d.at.set(i.at.get())
+                        d.score.set(this.score(i.value))
+                    }))
         }
 
         return this._status
@@ -151,6 +162,13 @@ class Metric {
                 && l.get().at.get() <= end)
 
         return this._dataBetween[start + '-' + end]
+    }
+}
+
+class Datum {
+    constructor() {
+        this.at = Value.of(Date)
+        this.value = Value.of(Number)
     }
 }
 
@@ -217,7 +235,7 @@ class Smoothed extends Metric {
                 d.value.set(values.reduce((sum, i) => sum + i, 0) / values.length)
             })
         })
-        
+
         return this._data
     }
 }
@@ -340,15 +358,15 @@ extend(Website, Source)
 
 
 
-function combine(indicators) {
-    const status = Many.of(Datum)
-    dates(indicators, i => i.status())
+function combine(signals) {
+    const status = Many.of(Status)
+    dates(signals, s => s.status())
         .forEach(at => status.add().create(d => {
             d.at.set(at)
-            d.value.set(Math.min(...indicators
-                .map(i => i.statusOn(at))
+            d.score.set(Math.min(...signals
+                .map(s => s.statusOn(at))
                 .filter(s => s.exists())
-                .map(s => s.get().value.get())))
+                .map(s => s.get().score.get())))
         }))
 
     return status

@@ -32,15 +32,15 @@ specify('Value', () => {
         a(Value.of(String), v =>
             v.set("foo") || v),
         "foo")
-    assert.same(Value.of(String),
+    assert.same(Value.of(Number),
         a(Value.of(Number), v =>
             v.set(42) || v),
         42)
-    assert.same(Value.of(String),
+    assert.same(Value.of(Boolean),
         a(Value.of(Boolean), v =>
             v.set(true) || v),
         true)
-    assert.same(Value.of(String),
+    assert.same(Value.of(Date),
         a(Value.of(Date), v =>
             v.set(new Date('2011-12-13T14:15:16.017Z')) || v),
         '2011-12-13T14:15:16.017Z')

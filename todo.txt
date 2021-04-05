@@ -1,3 +1,12 @@
 - build personal expeditions
+  X me
+    X body
+    X wagon
+  - house
+  - metadi
 - update facts with CLI app
 - participants and stakeholders
+- metrics on the dashboard
+- expeditions in grid
+- smooth expansion
+- different icon for reached summit, waypoint, and goal

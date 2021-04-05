@@ -18,7 +18,7 @@
 
     <div class="prototypes">
 
-        <div class="expedition card text-white bg-secondary mb-3">
+        <div class="expedition card text-white bg-dark mb-3">
             <div class="card-header">
                 <img src="../assets/icons/expedition.png" style="height: 4em; margin-right: 1em;"
                     class="icon float-start">
@@ -44,7 +44,7 @@
             </div>
         </div>
 
-        <div class="indicator card text-white bg-secondary mt-3">
+        <div class="indicator card text-white bg-dark mt-3">
             <div class="card-header">
                 <img src="../assets/icons/summit.png" style="height: 2.5em; margin-right: .5em;"
                     class="icon float-start">
@@ -157,12 +157,26 @@
             const $goal = renderIndicator(goal, role)
 
             const $children = $goal.find('.children').first()
-            goal.progress.forEach(indicator =>
-                $children.append(renderAny(indicator, 'progress')))
-            goal.location.forEach(indicator =>
-                $children.append(renderAny(indicator, 'location')))
+            goal.coordinates.forEach(coordinate =>
+                $children.append(renderCoordinate(coordinate)))
+            goal.pace.forEach(indicator =>
+                $children.append(renderAny(indicator, 'pace')))
+            goal.subs.forEach(sub =>
+                $children.append(renderGoal(sub, 'goal')))
 
             return $goal
+        }
+
+        function renderCoordinate(coordinate) {
+            const $coordinate = renderAny(coordinate.indicator, 'coordinate' + (coordinate.locked ? '_locked' : ''))
+            console.log(coordinate.locked, $coordinate)
+            if (!coordinate.locked) {
+                $coordinate.removeClass('bg-warning')
+                $coordinate.removeClass('bg-danger')
+                $coordinate.removeClass('bg-success')
+                $coordinate.addClass('bg-secondary')
+            }
+            return $coordinate
         }
 
         function renderTarget(target, role) {
@@ -183,7 +197,7 @@
 
         function drawGraph($container, data) {
             if (!data.length) return $container.remove()
-            
+
             const fontSize = 20
             const padding = fontSize * 1.5
             const margin = 5
@@ -204,7 +218,7 @@
             const now = new Date()
             const start = new Date(now.getTime() - window)
 
-            const inWindow = data.filter(s => new Date(s.at) >= start).map(s => s.value)
+            const inWindow = data.filter(s => new Date(s.at) >= start).map(s => s.score)
             const max = inWindow.reduce((acc, s) => Math.max(acc, s), 1)
             const min = inWindow.reduce((acc, s) => Math.min(acc, s), 0)
 
@@ -212,18 +226,18 @@
             const dy = (height - padding * 2) / (max - min)
 
             const x = date => (date - start) * dx
-            const y = value => height - padding - (value - min) * dy
+            const y = score => height - padding - (score - min) * dy
 
             ctx.lineWidth = 9
             ctx.beginPath()
             data.forEach((status, i) =>
                 (i ? ctx.lineTo : ctx.moveTo)
-                    .call(ctx, x(new Date(status.at)), y(status.value)))
+                    .call(ctx, x(new Date(status.at)), y(status.score)))
             ctx.stroke()
 
             data.forEach(status => {
                 ctx.beginPath();
-                ctx.arc(x(new Date(status.at)), y(status.value), 6, 0, 2 * Math.PI, false);
+                ctx.arc(x(new Date(status.at)), y(status.score), 6, 0, 2 * Math.PI, false);
                 ctx.fill();
             })
 
@@ -245,9 +259,11 @@
         function colorCode($element, status) {
             if (status.length == 0) return
 
-            const value = status[status.length - 1].value
-            if (value >= 1) return $element.addClass('bg-success')
-            if (value < 0) return $element.addClass('bg-danger')
+            $element.removeClass('bg-dark')
+
+            const score = status[status.length - 1].score
+            if (score >= 1) return $element.addClass('bg-success')
+            if (score <= 0) return $element.addClass('bg-danger')
             else return $element.addClass('bg-warning')
         }
 
@@ -294,12 +310,13 @@
                     type: 'Goal',
                     name,
                     description: 'I am number ' + name.toLowerCase(),
-                    location: [
+                    coordinates: [],
+                    pace: [],
+                    subs: [
                         testGoal('Goal one'),
                         testGoal('Goal two'),
                         testGoal('Goal three')
                     ].slice(0, Math.random() * 2 + 2),
-                    progress: [],
                     status: testStatus()
                 }
             }
@@ -309,19 +326,25 @@
                     type: 'Goal',
                     name,
                     description: 'I am number ' + name.toLowerCase(),
-                    location: [
-                        name == 'One'
-                            ? testGoal('Goal one of ' + name)
-                            : testTarget('Location one of ' + name),
-                        testTarget('Location two of ' + name),
-                        testTarget('Location three of ' + name)
+                    coordinates: [
+                        testCoordinate('Coordinate one of ' + name),
+                        testCoordinate('Coordinate two of ' + name),
+                        testCoordinate('Coordinate three of ' + name)
                     ].slice(0, Math.random() * 2 + 2),
-                    progress: [
-                        testTarget('Progress one of ' + name),
-                        testTarget('Progress two of ' + name),
-                        testTarget('Progress three of ' + name),
+                    pace: [
+                        testTarget('Pace target one of ' + name),
+                        testTarget('Pace target two of ' + name),
+                        testTarget('Pace target three of ' + name),
                     ].slice(0, Math.random() < .4 ? 0 : Math.random() * 2 + 2),
+                    subs: [],
                     status: testStatus()
+                }
+            }
+
+            function testCoordinate(name) {
+                return {
+                    locked: Math.random() < .5,
+                    indicator: testTarget(name)
                 }
             }
 
@@ -342,7 +365,7 @@
                 for (let daysAgo = Math.random() * 7; daysAgo < Math.random() * weeks * 14 + 14; daysAgo += Math.random() * 4 + 3) {
                     status.unshift({
                         at: new Date(new Date().getTime() - daysAgo * 24 * 3600 * 1000),
-                        value: Math.random() * 4 - 1
+                        score: Math.random() * 4 - 1
                     })
                 }
                 return status
