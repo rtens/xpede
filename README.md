@@ -47,9 +47,15 @@ To save the Expedition use
 save()
 ```
 
-You can quit the editor by pressing the key combination `Ctrl + D`.
+Or save and quit with 
+
+```
+quit()
+```
 
 The expedition is now saved as `store/expedition/first.json`.
+
+To quit the editor without saving use the key combination `Ctrl + D`.
 
 ### Creating and updating the dashboard
 
