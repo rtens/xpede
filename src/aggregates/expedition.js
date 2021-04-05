@@ -1,6 +1,8 @@
 const { Value, One, Many, Map, Formula, extend } = require('../model')
 const Party = require('./party')
 
+let cache = false
+
 class Expedition {
     constructor() {
         this.name = Value.of(String)
@@ -13,10 +15,18 @@ class Expedition {
     }
 
     status() {
+        if (cache && this._status) return this._status
+
         const goals = this.waypoints.getAll()
         if (this.summit.exists()) goals.push(this.summit.get())
 
-        return combine(goals)
+        this._status = combine(goals)
+        return this._status
+    }
+
+    withCaching(active = true) {
+        cache = active
+        return this
     }
 }
 module.exports = Expedition
@@ -39,14 +49,19 @@ class Indicator {
     }
 
     statusOn(at) {
+        if (!this._statusOn) this._statusOn = {}
+        if (cache && this._statusOn[at]) return this._statusOn[at]
+
         const status = this.status()
         if (status.isEmpty()) return One.of(Datum)
 
-        return status.all()
+        this._statusOn[at] = status.all()
             .filter(s => s.get().at.get() <= at)
             .reduce((found, next) =>
                 found.get().at.get() > next.get().at.get() ? found : next,
                 status.at(0))
+
+        return this._statusOn[at]
     }
 }
 
@@ -58,10 +73,17 @@ class Goal extends Indicator {
     }
 
     status() {
-        if (!this.progress.isEmpty()) return combine(this.progress.getAll())
-        if (!this.location.isEmpty()) return combine(this.location.getAll())
+        if (cache && this._status) return this._status
 
-        return super.status()
+        if (!this.progress.isEmpty()) {
+            this._status = combine(this.progress.getAll())
+        } else if (!this.location.isEmpty()) {
+            this._status = combine(this.location.getAll())
+        } else {
+            this._status = super.status()
+        }
+
+        return this._status
     }
 }
 extend(Goal, Indicator)
@@ -69,25 +91,31 @@ extend(Goal, Indicator)
 class Target extends Indicator {
     constructor() {
         super()
-        this.ok = Value.of(Number)
         this.good = Value.of(Number)
+        this.bad = Value.of(Number)
 
         this.metric = One.of(Metric)
     }
 
     status() {
-        if (!this.ok.exists() ||
-            !this.good.exists() ||
-            !this.metric.exists()) return super.status()
+        if (cache && this._status) return this._status
 
-        return this.metric.get().data().mapTo(Datum, (i, o) => o.create(d => {
-            d.at.set(i.at.get())
-            d.value.set(this.score(i.value))
-        }))
+        if (!this.bad.exists() ||
+            !this.good.exists() ||
+            !this.metric.exists()) {
+            this._status = super.status()
+        } else {
+            this._status = this.metric.get().data().mapTo(Datum, (i, o) => o.create(d => {
+                d.at.set(i.at.get())
+                d.value.set(this.score(i.value))
+            }))
+        }
+
+        return this._status
     }
 
     score(value) {
-        return (value.get() - this.ok.get()) / (this.good.get() - this.ok.get())
+        return (value.get() - this.bad.get()) / (this.good.get() - this.bad.get())
     }
 }
 extend(Target, Indicator)
@@ -103,16 +131,26 @@ class Metric {
     }
 
     datumOn(date) {
-        return this.data()
+        if (!this._datumOn) this._datumOn = {}
+        if (cache && this._datumOn[date]) return this._datumOn[date]
+
+        this._datumOn[date] = this.data()
             .select(l => l.get().at.get() <= date)
             .last()
+
+        return this._datumOn[date]
     }
 
     dataBetween(start, end) {
-        return this.data()
+        if (!this._dataBetween) this._dataBetween = {}
+        if (cache && this._dataBetween[start + '-' + end]) return this._dataBetween[start + '-' + end]
+
+        this._dataBetween[start + '-' + end] = this.data()
             .select(l =>
                 l.get().at.get() > start
                 && l.get().at.get() <= end)
+
+        return this._dataBetween[start + '-' + end]
     }
 }
 
@@ -124,12 +162,14 @@ class Derived extends Metric {
     }
 
     data() {
-        const data = Many.of(Datum)
+        if (cache && this._data) return this._data
+
+        this._data = Many.of(Datum)
         dates(this.inputs.values(), i => i.get().data()).forEach(date => {
             try {
                 this.formula.execute(date, this._inputMap())
                     .ifThere(result =>
-                        data.add().create(d => {
+                        this._data.add().create(d => {
                             d.at.set(date)
                             d.value.set(result)
                         })
@@ -138,7 +178,7 @@ class Derived extends Metric {
                 // console.error('Error in [' + this.name.get() + '] for [' + date.toISOString() + ']: ' + e)
             }
         })
-        return data
+        return this._data
     }
 
     _inputMap() {
@@ -157,9 +197,11 @@ class Smoothed extends Metric {
     }
 
     data() {
-        const data = Many.of(Datum)
+        if (cache && this._data) return this._data
+
+        this._data = Many.of(Datum)
         if (!this.input.exists() ||
-            !this.window.exists()) return data
+            !this.window.exists()) return this._data
 
         const window = this.window.get().millis()
 
@@ -170,12 +212,13 @@ class Smoothed extends Metric {
             const values = this.input.get().dataBetween(begin, date).getAll()
                 .map(d => d.value.get())
 
-            data.add().create(d => {
+            this._data.add().create(d => {
                 d.at.set(date)
                 d.value.set(values.reduce((sum, i) => sum + i, 0) / values.length)
             })
         })
-        return data
+        
+        return this._data
     }
 }
 extend(Smoothed, Metric)
@@ -189,10 +232,12 @@ class Averaged extends Metric {
     }
 
     data() {
-        const data = Many.of(Datum)
+        if (cache && this._data) return this._data
+
+        this._data = Many.of(Datum)
         if (!this.input.exists() ||
             !this.window.exists() ||
-            !this.unit.exists()) return data
+            !this.unit.exists()) return this._data
 
         const window = this.window.get().millis()
         const unit = this.unit.get().millis()
@@ -204,12 +249,12 @@ class Averaged extends Metric {
             const sum = this.input.get().dataBetween(begin, date).getAll()
                 .reduce((sum, d) => sum + d.value.get(), 0)
 
-            data.add().create(d => {
+            this._data.add().create(d => {
                 d.at.set(date)
                 d.value.set(sum / window * unit)
             })
         })
-        return data
+        return this._data
     }
 }
 extend(Averaged, Metric)
@@ -222,9 +267,11 @@ class Difference extends Metric {
     }
 
     data() {
-        const data = Many.of(Datum)
+        if (cache && this._data) return this._data
+
+        this._data = Many.of(Datum)
         if (!this.input.exists() ||
-            !this.window.exists()) return data
+            !this.window.exists()) return this._data
 
         const window = this.window.get().millis()
 
@@ -235,15 +282,15 @@ class Difference extends Metric {
 
             if (!then.exists()) return
 
-            const diff = this.input.get().datumOn(date).get().value.get() - 
+            const diff = this.input.get().datumOn(date).get().value.get() -
                 then.get().value.get()
-                
-            data.add().create(d => {
+
+            this._data.add().create(d => {
                 d.at.set(date)
                 d.value.set(diff)
             })
         })
-        return data
+        return this._data
     }
 }
 extend(Difference, Metric)
@@ -265,9 +312,9 @@ class Span {
 class Measured extends Metric {
     constructor() {
         super()
-        this.facts = Many.of(Datum)
         this.frequency = One.of(Span)
         this.source = One.of(Source)
+        this.facts = Many.of(Datum)
     }
 
     data() {

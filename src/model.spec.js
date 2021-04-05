@@ -11,6 +11,12 @@ specify('Value', () => {
         "foo")
     assert.equal(
         a(Value.of(String), v =>
+            v.set(0) ||
+            v.get()),
+        0
+    )
+    assert.equal(
+        a(Value.of(String), v =>
             v.exists()),
         false)
     assert.equal(
@@ -130,6 +136,20 @@ specify('One', () => {
     assert.same(new HasFunction,
         new HasFunction,
         { "type": "HasFunction", "fields": {} })
+
+    class TransientProperties {
+        constructor() {
+            this.foo = Value.of(String)
+            this._bar = Value.of(String)
+
+            this.foo.set('one')
+            this._bar.set('two')
+        }
+    }
+
+    assert.same(new TransientProperties,
+         new TransientProperties,
+         {"type":"TransientProperties","fields":{"foo":"one"}})
 })
 
 specify('Many', () => {
@@ -244,9 +264,12 @@ specify('Reference', () => {
         new TwoReferences(o =>
             o.first.create() &&
             o.second.set(o.first.get())),
-        { "type": "TwoReferences", "fields": { 
-            "first": { "id": "@1", "type": "ReferencedObject", "fields": {} }, 
-            "second": "@1" } })
+        {
+            "type": "TwoReferences", "fields": {
+                "first": { "id": "@1", "type": "ReferencedObject", "fields": {} },
+                "second": "@1"
+            }
+        })
 
     class ThreeReferences {
         constructor(fn) {

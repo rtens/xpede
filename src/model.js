@@ -47,7 +47,9 @@ class Value extends ObjectContainer {
     }
 
     get(defaultTo = null) {
-        return this.object || defaultTo
+        return this.object !== null
+            ? this.object
+            : defaultTo
     }
 
     clone() {
@@ -255,7 +257,7 @@ class Formula extends Container {
     }
 
     body() {
-        this.function.toString()
+        return this.function.toString()
     }
 
     description() {

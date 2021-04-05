@@ -61,8 +61,10 @@ class Storing {
 
         } else {
             const fields = {}
-            Object.keys(object).forEach(k =>
-                fields[k] = this.deflate(object[k]))
+            Object.keys(object)
+                .filter(k => k.substr(0, 1) != '_')
+                .forEach(k =>
+                    fields[k] = this.deflate(object[k]))
 
             return { id: undefined, type, fields }
         }

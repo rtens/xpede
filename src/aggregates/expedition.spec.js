@@ -24,7 +24,7 @@ specify('Expedition uses Goal status', () => {
     t.good.set(42)
     assert.equal(e.status().getAll(), [])
 
-    t.ok.set(21)
+    t.bad.set(21)
     assert.equal(e.status().getAll(), [{
         at: { object: new Date('2011-12-13') },
         value: { object: 1 }
@@ -51,7 +51,7 @@ specify('Expedition uses worst Goal status', () => {
     e.summit.create(g =>
         g.location.add().createTarget(t => {
             t.good.set(20)
-            t.ok.set(10)
+            t.bad.set(10)
             t.metric.createMeasured(m =>
                 m.facts.add().create(d => {
                     d.at.set(new Date('2011-12-13'))
@@ -64,7 +64,7 @@ specify('Expedition uses worst Goal status', () => {
     e.waypoints.add().create(g =>
         g.location.add().createTarget(t => {
             t.good.set(20)
-            t.ok.set(10)
+            t.bad.set(10)
             t.metric.createMeasured(m => {
                 m.facts.add().create(d => {
                     d.at.set(new Date('2011-12-14'))
@@ -81,7 +81,7 @@ specify('Expedition uses worst Goal status', () => {
     e.waypoints.add().create(g =>
         g.location.add().createTarget(t => {
             t.good.set(20)
-            t.ok.set(10)
+            t.bad.set(10)
             t.metric.createMeasured(m => {
                 m.facts.add().create(d => {
                     d.at.set(new Date('2011-12-15'))
@@ -114,7 +114,7 @@ specify('Use worst Location status', () => {
 
     g.location.add().createTarget(t => {
         t.good.set(20)
-        t.ok.set(10)
+        t.bad.set(10)
         t.metric.createMeasured(m =>
             m.facts.add().create(d => {
                 d.at.set(new Date('2011-12-13'))
@@ -125,7 +125,7 @@ specify('Use worst Location status', () => {
 
     g.location.add().createTarget(t => {
         t.good.set(20)
-        t.ok.set(10)
+        t.bad.set(10)
         t.metric.createMeasured(m => {
             m.facts.add().create(d => {
                 d.at.set(new Date('2011-12-14'))
@@ -140,7 +140,7 @@ specify('Use worst Location status', () => {
 
     g.location.add().createTarget(t => {
         t.good.set(20)
-        t.ok.set(10)
+        t.bad.set(10)
         t.metric.createMeasured(m => {
             m.facts.add().create(d => {
                 d.at.set(new Date('2011-12-15'))
@@ -173,7 +173,7 @@ specify('Progress status trumps Location status', () => {
 
     summit.location.add().createTarget(t => {
         t.good.set(42)
-        t.ok.set(21)
+        t.bad.set(21)
         t.metric.createMeasured(m =>
             m.facts.add().create(d => {
                 d.at.set(new Date('2011-12-13'))
@@ -186,7 +186,7 @@ specify('Progress status trumps Location status', () => {
     assert.equal(e.status().getAll(), [])
 
     t.good.set(21)
-    t.ok.set(0)
+    t.bad.set(0)
     t.metric.createMeasured(m =>
         m.facts.add().create(d => {
             d.at.set(new Date('2011-12-14'))
@@ -206,7 +206,7 @@ specify('Use worst Progress status', () => {
 
     g.progress.add().createTarget(t => {
         t.good.set(20)
-        t.ok.set(10)
+        t.bad.set(10)
         t.metric.createMeasured(m =>
             m.facts.add().create(d => {
                 d.at.set(new Date('2011-12-13'))
@@ -217,7 +217,7 @@ specify('Use worst Progress status', () => {
 
     g.progress.add().createTarget(t => {
         t.good.set(20)
-        t.ok.set(10)
+        t.bad.set(10)
         t.metric.createMeasured(m => {
             m.facts.add().create(d => {
                 d.at.set(new Date('2011-12-14'))
@@ -232,7 +232,7 @@ specify('Use worst Progress status', () => {
 
     g.progress.add().createTarget(t => {
         t.good.set(20)
-        t.ok.set(10)
+        t.bad.set(10)
         t.metric.createMeasured(m => {
             m.facts.add().create(d => {
                 d.at.set(new Date('2011-12-15'))
@@ -263,7 +263,7 @@ specify('Derived Metric', () => {
     e.summit.create(s =>
         s.location.add().createTarget(t => {
             t.good.set(10)
-            t.ok.set(0)
+            t.bad.set(0)
             t.metric.createDerived(m => {
                 m.formula.set((value, at, { one, two }) => {
                     value.set(
@@ -302,7 +302,7 @@ specify('Smoothed Metric', () => {
     e.summit.create(s =>
         s.location.add().createTarget(t => {
             t.good.set(10)
-            t.ok.set(0)
+            t.bad.set(0)
             t.metric.createSmoothed(m => {
                 m.window.create(w => w.days.set(3))
                 m.input.createMeasured(m => {
@@ -328,7 +328,7 @@ specify('Averaged Metric', () => {
     e.summit.create(s =>
         s.location.add().createTarget(t => {
             t.good.set(10)
-            t.ok.set(0)
+            t.bad.set(0)
             t.metric.createAveraged(m => {
                 m.window.create(w => w.days.set(4))
                 m.unit.create(u => u.days.set(1))
@@ -355,7 +355,7 @@ specify('Difference Metric', () => {
     e.summit.create(s =>
         s.location.add().createTarget(t => {
             t.good.set(10)
-            t.ok.set(0)
+            t.bad.set(0)
             t.metric.createDifference(m => {
                 m.window.create(w => w.days.set(3))
                 m.input.createMeasured(m => {

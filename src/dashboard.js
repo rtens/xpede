@@ -54,7 +54,7 @@ function mapGoal(g, indicator) {
 function mapTarget(t, indicator) {
     return {
         ...indicator,
-        ok: t.ok.get(),
+        bad: t.bad.get(),
         good: t.good.get()
     }
 }
@@ -70,7 +70,7 @@ function readExpeditions(files) {
     return files
         .split('\n')
         .map(f => require(f))
-        .map(f => Loading.fromFlat(f).inflated(new Expedition))
+        .map(f => Loading.fromFlat(f).inflated(new Expedition).withCaching(true))
 }
 
 function createOutput(dashboard) {

@@ -29,7 +29,7 @@ specify('Summit location', () => {
             t.name.set('A Target')
             t.description.set('Something about the target')
             t.good.set(20)
-            t.ok.set(10)
+            t.bad.set(10)
             t.metric.createMeasured(m =>
                 m.facts.add().create(d => {
                     d.at.set(new Date('2011-12-13T14:15:16.017Z'))
@@ -61,7 +61,7 @@ specify('Summit location', () => {
                         "value": 0.8
                     }
                 ],
-                "ok": 10,
+                "bad": 10,
                 "good": 20
             }
         ],
@@ -83,7 +83,7 @@ specify('Summit progress', () => {
             t.name.set('A Target')
             t.description.set('Something about the target')
             t.good.set(20)
-            t.ok.set(10)
+            t.bad.set(10)
             t.metric.createMeasured(m =>
                 m.facts.add().create(d => {
                     d.at.set(new Date('2011-12-13T14:15:16.017Z'))
@@ -115,7 +115,7 @@ specify('Summit progress', () => {
                         "value": 0.8
                     }
                 ],
-                "ok": 10,
+                "bad": 10,
                 "good": 20
             }
         ]
@@ -134,7 +134,7 @@ specify('Nested goals', () => {
                 t.name.set('A Target')
                 t.description.set('Something about the target')
                 t.good.set(20)
-                t.ok.set(10)
+                t.bad.set(10)
                 t.metric.createMeasured(m =>
                     m.facts.add().create(d => {
                         d.at.set(new Date('2011-12-13T14:15:16.017Z'))
@@ -168,7 +168,7 @@ specify('Nested goals', () => {
                     "at": "2011-12-13T14:15:16.017Z",
                     "value": 0.8
                 }],
-                "ok": 10,
+                "bad": 10,
                 "good": 20
             }],
             "progress": []
@@ -186,7 +186,7 @@ specify('Waypoints', () => {
             t.name.set('A Target')
             t.description.set('Something about the target')
             t.good.set(20)
-            t.ok.set(10)
+            t.bad.set(10)
             t.metric.createMeasured(m =>
                 m.facts.add().create(d => {
                     d.at.set(new Date('2011-12-13T14:15:16.017Z'))
@@ -212,7 +212,7 @@ specify('Waypoints', () => {
                 "at": "2011-12-13T14:15:16.017Z",
                 "value": 0.8
             }],
-            "ok": 10,
+            "bad": 10,
             "good": 20
         }],
         "progress": []

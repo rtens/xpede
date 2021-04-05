@@ -63,7 +63,7 @@
 
         <div class="target">
             <h5>Good: <span class="good"></span></h5>
-            <h5>OK: <span class="ok"></span></h5>
+            <h5>Bad: <span class="bad"></span></h5>
         </div>
 
     </div>
@@ -171,7 +171,7 @@
             const $extra = proto('target')
             $target.find('.extra').first().append($extra)
 
-            $extra.find('.ok').html(target.ok)
+            $extra.find('.bad').html(target.bad)
             $extra.find('.good').html(target.good)
 
             return $target
@@ -182,6 +182,8 @@
         }
 
         function drawGraph($container, data) {
+            if (!data.length) return $container.remove()
+            
             const fontSize = 20
             const padding = fontSize * 1.5
             const margin = 5
@@ -328,14 +330,14 @@
                     type: 'Target',
                     name,
                     description: 'I have reached ' + name,
-                    ok: Math.round(Math.random() * 12),
                     good: Math.round(Math.random() * 21 + 12),
+                    bad: Math.round(Math.random() * 12),
                     status: testStatus(),
                     metric: testMetric()
                 }
             }
 
-            function testStatus(ok, good) {
+            function testStatus() {
                 const status = []
                 for (let daysAgo = Math.random() * 7; daysAgo < Math.random() * weeks * 14 + 14; daysAgo += Math.random() * 4 + 3) {
                     status.unshift({
