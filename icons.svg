@@ -28,9 +28,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="2.0945143"
-     inkscape:cx="290.60521"
-     inkscape:cy="567.62907"
+     inkscape:zoom="2.6876873"
+     inkscape:cx="282.48757"
+     inkscape:cy="294.91076"
      inkscape:document-units="px"
      inkscape:current-layer="layer2"
      showgrid="false"
@@ -286,6 +286,66 @@
        height="85.556816"
        x="157.50542"
        y="563.64124" />
+    <rect
+       inkscape:export-ydpi="200"
+       inkscape:export-xdpi="200"
+       inkscape:export-filename="/home/rtens/files/projects/xpede/prototype/assets/icons/summit.png"
+       y="667.99921"
+       x="56.663689"
+       height="85.556816"
+       width="85.556816"
+       id="rect4278"
+       style="opacity:1;fill:#b3b3b3;fill-opacity:1;stroke:none;stroke-width:1.99999988;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+    <rect
+       y="669.52368"
+       x="157.13335"
+       height="85.556816"
+       width="85.556816"
+       id="rect4280"
+       style="opacity:1;fill:#b3b3b3;fill-opacity:1;stroke:none;stroke-width:1.99999988;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       inkscape:export-filename="/home/rtens/files/projects/xpede/prototype/assets/icons/waypoint.png"
+       inkscape:export-xdpi="200"
+       inkscape:export-ydpi="200" />
+    <rect
+       inkscape:export-ydpi="200"
+       inkscape:export-xdpi="200"
+       inkscape:export-filename="/home/rtens/files/projects/xpede/prototype/assets/icons/subgoal.png"
+       style="opacity:1;fill:#b3b3b3;fill-opacity:1;stroke:none;stroke-width:1.99999988;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect4282"
+       width="85.556816"
+       height="85.556816"
+       x="157.13335"
+       y="767.12006" />
+    <rect
+       style="opacity:1;fill:#b3b3b3;fill-opacity:1;stroke:none;stroke-width:1.99999988;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect4509"
+       width="85.556816"
+       height="85.556816"
+       x="257.20786"
+       y="667.99921"
+       inkscape:export-filename="/home/rtens/files/projects/xpede/prototype/assets/icons/summit_reached.png"
+       inkscape:export-xdpi="200"
+       inkscape:export-ydpi="200" />
+    <rect
+       inkscape:export-ydpi="200"
+       inkscape:export-xdpi="200"
+       inkscape:export-filename="/home/rtens/files/projects/xpede/prototype/assets/icons/waypoint_reached.png"
+       style="opacity:1;fill:#b3b3b3;fill-opacity:1;stroke:none;stroke-width:1.99999988;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect4511"
+       width="85.556816"
+       height="85.556816"
+       x="357.67752"
+       y="669.52368" />
+    <rect
+       y="767.12006"
+       x="357.67752"
+       height="85.556816"
+       width="85.556816"
+       id="rect4513"
+       style="opacity:1;fill:#b3b3b3;fill-opacity:1;stroke:none;stroke-width:1.99999988;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       inkscape:export-filename="/home/rtens/files/projects/xpede/prototype/assets/icons/subgoal_reached.png"
+       inkscape:export-xdpi="200"
+       inkscape:export-ydpi="200" />
   </g>
   <g
      inkscape:label="Layer 1"
@@ -1223,5 +1283,351 @@
        id="path4456"
        d="m 191.85833,593.39378 6.56658,6.73522 11.67611,-14.28205"
        style="opacity:1;fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+    <g
+       id="g4411"
+       transform="matrix(1.1229922,0,0,1.1277597,-13.797766,-97.252697)"
+       inkscape:export-filename="/home/rtens/files/projects/xpede/prototype/assets/icons/summit.png"
+       inkscape:export-xdpi="200"
+       inkscape:export-ydpi="200">
+      <path
+         style="opacity:1;fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:4.44296932;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+         d="m 81.026658,743.35918 21.896412,-31.66936 22.26752,32.04049"
+         id="path4290"
+         inkscape:connector-curvature="0"
+         inkscape:export-filename="/home/rtens/files/projects/xpede/prototype/assets/icons/summit.png"
+         inkscape:export-xdpi="200"
+         inkscape:export-ydpi="200" />
+      <path
+         style="opacity:1;fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:4.44296932;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+         d="m 90.923338,729.75125 7.42251,5.56688 5.072052,-4.70092 5.44317,4.57722 6.68026,-5.31947"
+         id="path4292"
+         inkscape:connector-curvature="0"
+         sodipodi:nodetypes="ccccc"
+         inkscape:export-filename="/home/rtens/files/projects/xpede/prototype/assets/icons/summit.png"
+         inkscape:export-xdpi="200"
+         inkscape:export-ydpi="200" />
+    </g>
+    <ellipse
+       ry="2.3641381"
+       rx="2.365119"
+       style="opacity:1;fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="ellipse4298"
+       cx="180.07167"
+       cy="731.01953"
+       inkscape:export-filename="/home/rtens/files/projects/xpede/prototype/assets/icons/waypoint.png"
+       inkscape:export-xdpi="200"
+       inkscape:export-ydpi="200" />
+    <ellipse
+       ry="4.8257771"
+       rx="4.8272543"
+       style="opacity:1;fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="ellipse4300"
+       cx="202.02"
+       cy="723.26501"
+       inkscape:export-filename="/home/rtens/files/projects/xpede/prototype/assets/icons/waypoint.png"
+       inkscape:export-xdpi="200"
+       inkscape:export-ydpi="200" />
+    <ellipse
+       ry="2.3641381"
+       rx="2.365119"
+       cy="711.29749"
+       cx="221.40921"
+       id="ellipse4302"
+       style="opacity:1;fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       inkscape:export-filename="/home/rtens/files/projects/xpede/prototype/assets/icons/waypoint.png"
+       inkscape:export-xdpi="200"
+       inkscape:export-ydpi="200" />
+    <g
+       id="g4473"
+       transform="matrix(1.072229,0,0,1.0740895,-10.816493,-69.47071)"
+       inkscape:export-filename="/home/rtens/files/projects/xpede/prototype/assets/icons/subgoal.png"
+       inkscape:export-xdpi="200"
+       inkscape:export-ydpi="200">
+      <g
+         transform="matrix(0.81147803,0,0,0.7495396,33.760072,205.72954)"
+         id="g4436">
+        <path
+           inkscape:connector-curvature="0"
+           style="opacity:1;fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:5.97407007;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+           d="m 193.98031,821.40428 a 5.8600569,5.8600569 0 0 1 -1.71463,-4.14195 5.8600569,5.8600569 0 0 1 5.86005,-5.86006 5.8600569,5.8600569 0 0 1 5.86006,5.86006 l 0,0 a 5.8600569,5.8600569 0 0 1 -1.71434,4.14166"
+           id="path4432" />
+        <path
+           style="opacity:1;fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:5.97407007;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+           d="m 202.57199,821.40155 14.31515,0"
+           id="path4423"
+           inkscape:connector-curvature="0" />
+        <path
+           inkscape:connector-curvature="0"
+           id="path4434"
+           d="m 179.08917,821.40154 14.67938,0"
+           style="opacity:1;fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:5.97407007;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+      </g>
+      <g
+         id="g4441"
+         transform="matrix(0.81147803,0,0,0.7495396,33.825845,229.67084)">
+        <path
+           id="path4444"
+           d="m 196.44495,821.40428 a 5.8600569,5.8600569 0 0 1 -1.71463,-4.14195 5.8600569,5.8600569 0 0 1 5.86005,-5.86006 5.8600569,5.8600569 0 0 1 5.86006,5.86006 l 0,0 a 5.8600569,5.8600569 0 0 1 -1.71434,4.14166"
+           style="opacity:1;fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:5.97407007;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+           inkscape:connector-curvature="0" />
+        <path
+           inkscape:connector-curvature="0"
+           id="path4446"
+           d="m 204.75308,821.40155 12.14145,0"
+           style="opacity:1;fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:5.97407007;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+        <path
+           style="opacity:1;fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:5.97407055;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+           d="m 179.17092,821.40162 16.94751,0"
+           id="path4448"
+           inkscape:connector-curvature="0" />
+      </g>
+      <g
+         transform="matrix(0,0.81147803,-0.7495396,0,825.69903,674.10617)"
+         id="g4450">
+        <path
+           inkscape:connector-curvature="0"
+           style="opacity:1;fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:5.97407007;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+           d="m 193.98031,821.40428 a 5.8600569,5.8600569 0 0 1 -1.71463,-4.14195 5.8600569,5.8600569 0 0 1 5.86005,-5.86006 5.8600569,5.8600569 0 0 1 5.86006,5.86006 l 0,0 a 5.8600569,5.8600569 0 0 1 -1.71434,4.14166"
+           id="path4454" />
+        <path
+           style="opacity:1;fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:5.97407007;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+           d="m 202.6685,821.40155 8.04314,0"
+           id="path4458"
+           inkscape:connector-curvature="0" />
+        <path
+           inkscape:connector-curvature="0"
+           id="path4460"
+           d="m 181.89296,821.40152 11.74653,0"
+           style="opacity:1;fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:5.97407007;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+      </g>
+      <g
+         id="g4462"
+         transform="matrix(0,0.81147803,-0.7495396,0,794.65427,674.10617)">
+        <path
+           id="path4467"
+           d="m 193.98031,821.40428 a 5.8600569,5.8600569 0 0 1 -1.71463,-4.14195 5.8600569,5.8600569 0 0 1 5.86005,-5.86006 5.8600569,5.8600569 0 0 1 5.86006,5.86006 l 0,0 a 5.8600569,5.8600569 0 0 1 -1.71434,4.14166"
+           style="opacity:1;fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:5.97407007;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+           inkscape:connector-curvature="0" />
+        <path
+           inkscape:connector-curvature="0"
+           id="path4469"
+           d="m 202.6685,821.40155 8.04314,0"
+           style="opacity:1;fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:5.97407007;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+        <path
+           style="opacity:1;fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:5.97407007;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+           d="m 181.89296,821.40152 11.74653,0"
+           id="path4471"
+           inkscape:connector-curvature="0" />
+      </g>
+    </g>
+    <g
+       transform="matrix(1.1229922,0,0,1.1277597,186.7464,-97.252697)"
+       id="g4515"
+       inkscape:export-filename="/home/rtens/files/projects/xpede/prototype/assets/icons/summit_reached.png"
+       inkscape:export-xdpi="200"
+       inkscape:export-ydpi="200">
+      <path
+         inkscape:export-ydpi="200"
+         inkscape:export-xdpi="200"
+         inkscape:export-filename="/home/rtens/files/projects/xpede/prototype/assets/icons/summit.png"
+         inkscape:connector-curvature="0"
+         id="path4517"
+         d="m 81.026658,743.35918 21.896412,-31.66936 22.26752,32.04049"
+         style="opacity:1;fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:4.44296932;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+      <path
+         inkscape:export-ydpi="200"
+         inkscape:export-xdpi="200"
+         inkscape:export-filename="/home/rtens/files/projects/xpede/prototype/assets/icons/summit.png"
+         sodipodi:nodetypes="ccccc"
+         inkscape:connector-curvature="0"
+         id="path4519"
+         d="m 90.923338,729.75125 7.42251,5.56688 5.072052,-4.70092 5.44317,4.57722 6.68026,-5.31947"
+         style="opacity:1;fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:4.44296932;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+    </g>
+    <ellipse
+       inkscape:export-ydpi="200"
+       inkscape:export-xdpi="200"
+       inkscape:export-filename="/home/rtens/files/projects/xpede/prototype/assets/icons/waypoint_reached.png"
+       cy="731.01953"
+       cx="380.61584"
+       id="ellipse4521"
+       style="opacity:1;fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       rx="2.365119"
+       ry="2.3641381" />
+    <ellipse
+       inkscape:export-ydpi="200"
+       inkscape:export-xdpi="200"
+       inkscape:export-filename="/home/rtens/files/projects/xpede/prototype/assets/icons/waypoint_reached.png"
+       cy="723.26501"
+       cx="402.56418"
+       id="ellipse4523"
+       style="opacity:1;fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       rx="4.8272543"
+       ry="4.8257771" />
+    <ellipse
+       inkscape:export-ydpi="200"
+       inkscape:export-xdpi="200"
+       inkscape:export-filename="/home/rtens/files/projects/xpede/prototype/assets/icons/waypoint_reached.png"
+       style="opacity:1;fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="ellipse4525"
+       cx="421.95337"
+       cy="711.29749"
+       rx="2.365119"
+       ry="2.3641381" />
+    <g
+       transform="matrix(1.072229,0,0,1.0740895,189.72767,-69.47071)"
+       id="g4527"
+       inkscape:export-filename="/home/rtens/files/projects/xpede/prototype/assets/icons/subgoal_reached.png"
+       inkscape:export-xdpi="200"
+       inkscape:export-ydpi="200">
+      <g
+         id="g4529"
+         transform="matrix(0.81147803,0,0,0.7495396,33.760072,205.72954)">
+        <path
+           id="path4531"
+           d="m 193.98031,821.40428 a 5.8600569,5.8600569 0 0 1 -1.71463,-4.14195 5.8600569,5.8600569 0 0 1 5.86005,-5.86006 5.8600569,5.8600569 0 0 1 5.86006,5.86006 l 0,0 a 5.8600569,5.8600569 0 0 1 -1.71434,4.14166"
+           style="opacity:1;fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:5.97407007;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+           inkscape:connector-curvature="0" />
+        <path
+           inkscape:connector-curvature="0"
+           id="path4533"
+           d="m 202.57199,821.40155 14.31515,0"
+           style="opacity:1;fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:5.97407007;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+        <path
+           style="opacity:1;fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:5.97407007;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+           d="m 179.08917,821.40154 14.67938,0"
+           id="path4535"
+           inkscape:connector-curvature="0" />
+      </g>
+      <g
+         transform="matrix(0.81147803,0,0,0.7495396,33.825845,229.67084)"
+         id="g4537">
+        <path
+           inkscape:connector-curvature="0"
+           style="opacity:1;fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:5.97407007;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+           d="m 196.44495,821.40428 a 5.8600569,5.8600569 0 0 1 -1.71463,-4.14195 5.8600569,5.8600569 0 0 1 5.86005,-5.86006 5.8600569,5.8600569 0 0 1 5.86006,5.86006 l 0,0 a 5.8600569,5.8600569 0 0 1 -1.71434,4.14166"
+           id="path4539" />
+        <path
+           style="opacity:1;fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:5.97407007;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+           d="m 204.75308,821.40155 12.14145,0"
+           id="path4541"
+           inkscape:connector-curvature="0" />
+        <path
+           inkscape:connector-curvature="0"
+           id="path4543"
+           d="m 179.17092,821.40162 16.94751,0"
+           style="opacity:1;fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:5.97407055;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+      </g>
+      <g
+         id="g4545"
+         transform="matrix(0,0.81147803,-0.7495396,0,825.69903,674.10617)">
+        <path
+           id="path4547"
+           d="m 193.98031,821.40428 a 5.8600569,5.8600569 0 0 1 -1.71463,-4.14195 5.8600569,5.8600569 0 0 1 5.86005,-5.86006 5.8600569,5.8600569 0 0 1 5.86006,5.86006 l 0,0 a 5.8600569,5.8600569 0 0 1 -1.71434,4.14166"
+           style="opacity:1;fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:5.97407007;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+           inkscape:connector-curvature="0" />
+        <path
+           inkscape:connector-curvature="0"
+           id="path4549"
+           d="m 202.6685,821.40155 8.04314,0"
+           style="opacity:1;fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:5.97407007;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+        <path
+           style="opacity:1;fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:5.97407007;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+           d="m 181.89296,821.40152 11.74653,0"
+           id="path4551"
+           inkscape:connector-curvature="0" />
+      </g>
+      <g
+         transform="matrix(0,0.81147803,-0.7495396,0,794.65427,674.10617)"
+         id="g4553">
+        <path
+           inkscape:connector-curvature="0"
+           style="opacity:1;fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:5.97407007;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+           d="m 193.98031,821.40428 a 5.8600569,5.8600569 0 0 1 -1.71463,-4.14195 5.8600569,5.8600569 0 0 1 5.86005,-5.86006 5.8600569,5.8600569 0 0 1 5.86006,5.86006 l 0,0 a 5.8600569,5.8600569 0 0 1 -1.71434,4.14166"
+           id="path4555" />
+        <path
+           style="opacity:1;fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:5.97407007;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+           d="m 202.6685,821.40155 8.04314,0"
+           id="path4557"
+           inkscape:connector-curvature="0" />
+        <path
+           inkscape:connector-curvature="0"
+           id="path4559"
+           d="m 181.89296,821.40152 11.74653,0"
+           style="opacity:1;fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:5.97407007;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+      </g>
+    </g>
+    <g
+       inkscape:export-ydpi="200"
+       inkscape:export-xdpi="200"
+       inkscape:export-filename="/home/rtens/files/projects/xpede/prototype/assets/icons/waypoint_reached.png"
+       transform="matrix(1.1063846,0,0,1.102164,177.36574,295.58314)"
+       id="g4561">
+      <path
+         style="opacity:1;fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:4.52786875;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+         d="m 203.61042,388.35212 0,-32.77595"
+         id="path4563"
+         inkscape:connector-curvature="0"
+         inkscape:export-filename="/home/rtens/files/projects/xpede/prototype/assets/icons/waypoint.png"
+         inkscape:export-xdpi="200"
+         inkscape:export-ydpi="200" />
+      <path
+         style="opacity:1;fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:4.52786875;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+         d="m 203.58633,357.45591 c -6.36527,-3.5923 -15.96141,4.41757 -25.12353,-0.0485 l 0,14.95174 c 7.04037,5.53408 16.29895,-4.36902 25.0753,0 z"
+         id="path4565"
+         inkscape:connector-curvature="0"
+         sodipodi:nodetypes="ccccc"
+         inkscape:export-filename="/home/rtens/files/projects/xpede/prototype/assets/icons/waypoint.png"
+         inkscape:export-xdpi="200"
+         inkscape:export-ydpi="200" />
+    </g>
+    <g
+       id="g4567"
+       transform="matrix(0.81318041,0,0,0.82042966,136.82405,386.5822)"
+       inkscape:export-filename="/home/rtens/files/projects/xpede/prototype/assets/icons/summit_reached.png"
+       inkscape:export-xdpi="200"
+       inkscape:export-ydpi="200">
+      <path
+         inkscape:export-ydpi="200"
+         inkscape:export-xdpi="200"
+         inkscape:export-filename="/home/rtens/files/projects/xpede/prototype/assets/icons/waypoint.png"
+         inkscape:connector-curvature="0"
+         id="path4569"
+         d="m 203.61042,388.35212 0,-32.77595"
+         style="opacity:1;fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:6.12147188;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+      <path
+         inkscape:export-ydpi="200"
+         inkscape:export-xdpi="200"
+         inkscape:export-filename="/home/rtens/files/projects/xpede/prototype/assets/icons/waypoint.png"
+         sodipodi:nodetypes="ccccc"
+         inkscape:connector-curvature="0"
+         id="path4571"
+         d="m 203.58633,357.45591 c -6.36527,-3.5923 -15.96141,4.41757 -25.12353,-0.0485 l 0,14.95174 c 7.04037,5.53408 16.29895,-4.36902 25.0753,0 z"
+         style="opacity:1;fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:6.12147188;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+    </g>
+    <g
+       inkscape:export-ydpi="200"
+       inkscape:export-xdpi="200"
+       inkscape:export-filename="/home/rtens/files/projects/xpede/prototype/assets/icons/subgoal_reached.png"
+       transform="matrix(1.1063846,0,0,1.102164,175.5241,389.50668)"
+       id="g4573">
+      <path
+         style="opacity:1;fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:4.52786875;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+         d="m 203.61042,388.35212 0,-32.77595"
+         id="path4575"
+         inkscape:connector-curvature="0"
+         inkscape:export-filename="/home/rtens/files/projects/xpede/prototype/assets/icons/waypoint.png"
+         inkscape:export-xdpi="200"
+         inkscape:export-ydpi="200" />
+      <path
+         style="opacity:1;fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:4.52786875;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+         d="m 203.58633,357.45591 c -6.36527,-3.5923 -15.96141,4.41757 -25.12353,-0.0485 l 0,14.95174 c 7.04037,5.53408 16.29895,-4.36902 25.0753,0 z"
+         id="path4577"
+         inkscape:connector-curvature="0"
+         sodipodi:nodetypes="ccccc"
+         inkscape:export-filename="/home/rtens/files/projects/xpede/prototype/assets/icons/waypoint.png"
+         inkscape:export-xdpi="200"
+         inkscape:export-ydpi="200" />
+    </g>
   </g>
 </svg>
