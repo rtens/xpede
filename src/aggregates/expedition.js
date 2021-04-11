@@ -82,6 +82,12 @@ class Goal extends Signal {
 
         return this._status
     }
+
+    isReached() {
+        return !(this.coordinates.isEmpty() && this.subs.isEmpty())
+            && this.coordinates.getAll().reduce((acc, i) => acc && !!i.locked.get(), true)
+            && this.subs.getAll().reduce((acc, i) => acc && i.isReached(), true)
+    }
 }
 
 class Coordinate {

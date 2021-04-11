@@ -7,7 +7,7 @@ specify('Minimal Expedition', () => {
     e.name.set('Foo')
 
     assert.equal(dashboard([e]), {
-        weeks: 8,
+        weeks: 12,
         expeditions: [
             {
                 name: 'Foo',
@@ -52,6 +52,7 @@ specify('Summit coordinates', () => {
                 "score": 0.8
             }
         ],
+        "reached": true,
         "coordinates": [
             {
                 "locked": true,
@@ -109,6 +110,7 @@ specify('Summit pace', () => {
                 "score": 0.8
             }
         ],
+        "reached": false,
         "coordinates": [],
         "pace": [
             {
@@ -163,6 +165,7 @@ specify('Sub goals', () => {
             "at": "2011-12-13T14:15:16.017Z",
             "score": 0.8
         }],
+        "reached": true,
         "coordinates": [],
         "pace": [],
         "subs": [{
@@ -173,6 +176,7 @@ specify('Sub goals', () => {
                 "at": "2011-12-13T14:15:16.017Z",
                 "score": 0.8
             }],
+            "reached": true,
             "coordinates": [{
                 "locked": true,
                 "indicator": {
@@ -223,6 +227,7 @@ specify('Waypoints', () => {
             "at": "2011-12-13T14:15:16.017Z",
             "score": 0.8
         }],
+        "reached": true,
         "coordinates": [{
             "locked": true,
             "indicator": {

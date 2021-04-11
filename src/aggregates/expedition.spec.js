@@ -358,20 +358,40 @@ specify('Use worst Pace status', () => {
     ])
 })
 
-function summitWithMetric(metricMapper) {
+specify('Reaching a Goal', () => {
     const e = new Expedition()
-    e.summit.create(s =>
-        s.coordinates.add().create(c => {
-            c.locked.set(true)
-            c.indicator.createTarget(t => {
-                t.good.set(10)
-                t.bad.set(0)
-                metricMapper(t.metric)
-            })
-        })
-    )
-    return e
-}
+
+    const s = e.summit.create()
+    assert.equal(s.isReached(), false)
+
+    const c1 = s.coordinates.add().create()
+    assert.equal(s.isReached(), false)
+
+    c1.locked.set(true)
+    assert.equal(s.isReached(), true)
+
+    const c2 = s.coordinates.add().create()
+    assert.equal(s.isReached(), false)
+
+    c2.locked.set(true)
+    assert.equal(s.isReached(), true)
+
+    const g1 = s.subs.add().create()
+    assert.equal(s.isReached(), false)
+
+    g1.coordinates.add().create(c => c.locked.set(true))
+    assert.equal(s.isReached(), true)
+
+    const w = e.waypoints.add().create()
+    assert.equal(w.isReached(), false)
+
+    w.subs.add().create(g =>
+        g.coordinates.add().create(c => c.locked.set(true)))
+    assert.equal(w.isReached(), true)
+
+    w.coordinates.add().create()
+    assert.equal(w.isReached(), false)
+})
 
 specify('Derived Metric', () => {
     const e = summitWithMetric(metric =>
@@ -470,3 +490,18 @@ specify('Difference Metric', () => {
         [new Date('2011-12-19'), 0.1],
     ])
 })
+
+function summitWithMetric(metricMapper) {
+    const e = new Expedition()
+    e.summit.create(s =>
+        s.coordinates.add().create(c => {
+            c.locked.set(true)
+            c.indicator.createTarget(t => {
+                t.good.set(10)
+                t.bad.set(0)
+                metricMapper(t.metric)
+            })
+        })
+    )
+    return e
+}

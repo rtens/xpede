@@ -21,43 +21,47 @@
         <div class="expedition card text-white bg-dark mb-3">
             <div class="card-header">
                 <img src="../assets/icons/expedition.png" style="height: 4em; margin-right: 1em;"
-                    class="icon float-start">
+                    title="Expedition" class="icon float-start">
                 <h1 class="name">Expedition Name</h1>
             </div>
 
-            <div class="card-body collapse show">
-                <div class="clearfix">
-                    <img src="../assets/icons/stakeholders.png" style="height: 2em; margin-right: 0.5em;"
-                        title="Stakeholders" class="icon float-start">
-                    <div class="stakeholders">Some stakeholders</div>
-                </div>
-                <div class="clearfix">
-                    <img src="../assets/icons/participants.png" style="height: 2em; margin-right: 0.5em;"
-                        title="Participants" class="icon float-start">
-                    <div class="participants">Some participants</div>
-                </div>
-                <div class="status">
-                    <canvas width="100" height="150"></canvas>
-                </div>
+            <div class="collapse show">
+                <div class="card-body">
+                    <div class="clearfix">
+                        <img src="../assets/icons/stakeholders.png" style="height: 2em; margin-right: 0.5em;"
+                            title="Stakeholders" class="icon float-start">
+                        <div class="stakeholders">Some stakeholders</div>
+                    </div>
+                    <div class="clearfix">
+                        <img src="../assets/icons/participants.png" style="height: 2em; margin-right: 0.5em;"
+                            title="Participants" class="icon float-start">
+                        <div class="participants">Some participants</div>
+                    </div>
+                    <div class="status">
+                        <canvas width="100" height="150"></canvas>
+                    </div>
 
-                <div class="goals"></div>
+                    <div class="goals"></div>
+                </div>
             </div>
         </div>
 
         <div class="indicator card text-white bg-dark mt-3">
             <div class="card-header">
                 <img src="../assets/icons/summit.png" style="height: 2.5em; margin-right: .5em;"
-                    class="icon float-start">
+                    title="Summit" class="icon float-start">
                 <h2 class="name">Summit Name</h2>
             </div>
 
-            <div class="card-body collapse show">
-                <p class="description">Some description</p>
-                <div class="extra"></div>
-                <div class="status">
-                    <canvas width="100" height="150"></canvas>
+            <div class="collapse show">
+                <div class="card-body">
+                    <p class="description">Some description</p>
+                    <div class="extra"></div>
+                    <div class="status">
+                        <canvas width="100" height="150"></canvas>
+                    </div>
+                    <div class="children"></div>
                 </div>
-                <div class="children"></div>
             </div>
         </div>
 
@@ -98,9 +102,9 @@
             writeParty($expedition.find('.stakeholders'), expedition.stakeholders)
             writeParty($expedition.find('.participants'), expedition.participants)
 
-            const $body = $expedition.find('.card-body')[0]
+            const $collapseTarget = $expedition.find('.collapse')[0]
             $expedition.find('.card-header').on('click', () =>
-                new bootstrap.Collapse($body))
+                new bootstrap.Collapse($collapseTarget))
 
             colorCode($expedition, expedition.status)
             const $status = $expedition.find('.status')
@@ -139,12 +143,13 @@
             $indicator = proto('indicator')
 
             $indicator.find('img').prop('src', '../assets/icons/' + role + '.png')
+            $indicator.find('img').prop('title', role.charAt(0).toUpperCase() + role.substr(1).replace('_', ' '))
             $indicator.find('.name').html(indicator.name)
             $indicator.find('.description').html(indicator.description)
 
-            const $body = $indicator.find('.card-body')[0]
+            const $collapseTarget = $indicator.find('.collapse')[0]
             $indicator.find('.card-header').on('click', () =>
-                new bootstrap.Collapse($body))
+                new bootstrap.Collapse($collapseTarget))
 
             colorCode($indicator, indicator.status)
             const $status = $indicator.find('.status')
@@ -154,7 +159,7 @@
         }
 
         function renderGoal(goal, role) {
-            const $goal = renderIndicator(goal, role)
+            const $goal = renderIndicator(goal, role + (goal.reached ? '_reached' : ''))
 
             const $children = $goal.find('.children').first()
             goal.coordinates.forEach(coordinate =>
@@ -162,7 +167,7 @@
             goal.pace.forEach(indicator =>
                 $children.append(renderAny(indicator, 'pace')))
             goal.subs.forEach(sub =>
-                $children.append(renderGoal(sub, 'goal')))
+                $children.append(renderGoal(sub, 'subgoal')))
 
             return $goal
         }
@@ -325,6 +330,7 @@
                 return {
                     type: 'Goal',
                     name,
+                    reached: Math.random() < .5,
                     description: 'I am number ' + name.toLowerCase(),
                     coordinates: [
                         testCoordinate('Coordinate one of ' + name),

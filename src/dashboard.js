@@ -12,7 +12,7 @@ runIt(() => readExpeditions(process.env.FILES),
 
 function toDashboard(expeditions) {
     return {
-        weeks: 8,
+        weeks: 12,
         expeditions: expeditions.map(mapExpedition)
     }
 }
@@ -46,6 +46,7 @@ function mapSignal(signal) {
 function mapGoal(g, indicator) {
     return {
         ...indicator,
+        reached: g.isReached(),
         coordinates: g.coordinates.all().map(mapCoordinate),
         pace: g.pace.all().map(mapSignal),
         subs: g.subs.all().map(mapSignal)

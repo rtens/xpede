@@ -1,7 +1,6 @@
-- smooth expansion
-- different icon for reached summit, waypoint, and goal
 - CLI app for updating metrics
 - metrics on the dashboard
 - participants and stakeholders
 - expeditions in grid
 - expedition detail view with split-out cards
+- resize graphs
