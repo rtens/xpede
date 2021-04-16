@@ -449,24 +449,43 @@ specify('Smoothed Metric', () => {
 })
 
 specify('Averaged Metric', () => {
+    let averaged
     const e = summitWithMetric(metric =>
         metric.createAveraged(m => {
+            averaged = m
             m.window.create(w => w.days.set(4))
             m.unit.create(u => u.days.set(1))
             m.input.createMeasured(m => {
-                m.facts.add().create(d => { d.at.set(new Date('2011-12-13')); d.value.set(12) })
-                m.facts.add().create(d => { d.at.set(new Date('2011-12-15')); d.value.set(12) })
-                m.facts.add().create(d => { d.at.set(new Date('2011-12-16')); d.value.set(12) })
-                m.facts.add().create(d => { d.at.set(new Date('2011-12-18')); d.value.set(8) })
+                m.facts.add().create(d => { d.at.set(new Date('2011-12-12')); d.value.set(20) })
+                m.facts.add().create(d => { d.at.set(new Date('2011-12-13')); d.value.set(16) })
+                m.facts.add().create(d => { d.at.set(new Date('2011-12-14')); d.value.set(12) })
+                m.facts.add().create(d => { d.at.set(new Date('2011-12-17')); d.value.set(8) })
             })
         })
     )
 
+    e.withCurrentDate(new Date('2011-12-20'))
     assert.equal(e.status().getAll().map(s => [s.at.get(), s.score.get()]), [
-        [new Date('2011-12-13'), 0.3],
-        [new Date('2011-12-15'), 0.6],
-        [new Date('2011-12-16'), 0.9],
-        [new Date('2011-12-18'), 0.8],
+        [new Date('2011-12-12'), 0.5],
+        [new Date('2011-12-13'), 0.9],
+        [new Date('2011-12-14'), 1.2],
+        [new Date('2011-12-17'), 0.5],
+        [new Date('2011-12-20'), 0.2],
+    ])
+
+    averaged.stopAtLast.set(true)
+    assert.equal(e.status().getAll().map(s => [s.at.get(), s.score.get()]), [
+        [new Date('2011-12-12'), 0.5],
+        [new Date('2011-12-13'), 0.9],
+        [new Date('2011-12-14'), 1.2],
+        [new Date('2011-12-17'), 0.5],
+    ])
+
+    averaged.stopAtFirst.set(true)
+    assert.equal(e.status().getAll().map(s => [s.at.get(), s.score.get()]), [
+        [new Date('2011-12-13'), 3.6],
+        [new Date('2011-12-14'), 2.4],
+        [new Date('2011-12-17'), 0.5],
     ])
 })
 

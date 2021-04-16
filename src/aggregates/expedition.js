@@ -2,6 +2,7 @@ const { Value, One, Many, Map, Formula, extend } = require('../model')
 const Party = require('./party')
 
 let cache = false
+let now = new Date()
 
 class Signal {
     constructor() {
@@ -55,6 +56,11 @@ class Expedition extends Signal {
 
     withCaching(active = true) {
         cache = active
+        return this
+    }
+
+    withCurrentDate(date) {
+        now = date
         return this
     }
 }
@@ -252,6 +258,8 @@ class Averaged extends Metric {
         super()
         this.window = One.of(Span)
         this.unit = One.of(Span)
+        this.stopAtFirst = Value.of(Boolean)
+        this.stopAtLast = Value.of(Boolean)
         this.input = One.of(Metric)
     }
 
@@ -266,18 +274,32 @@ class Averaged extends Metric {
         const window = this.window.get().millis()
         const unit = this.unit.get().millis()
 
-        this.input.get().data().getAll().forEach(datum => {
-            const date = datum.at.get()
-            const begin = new Date(date.getTime() - window)
+        const calcFor = date => {
+            const begin = new Date(date - window)
 
-            const sum = this.input.get().dataBetween(begin, date).getAll()
+            const data = this.input.get().dataBetween(begin, date)
+            const sum = data.getAll()
                 .reduce((sum, d) => sum + d.value.get(), 0)
+
+            let usedWindow = window
+            if (this.stopAtFirst.get()) {
+                const first = this.input.get().data().at(0).ifThere(d => d.at.get())
+                if (first > begin) {
+                    usedWindow = date - first
+                    if (!usedWindow) return
+                }
+            }
 
             this._data.add().create(d => {
                 d.at.set(date)
-                d.value.set(sum / window * unit)
+                d.value.set(sum / usedWindow * unit)
             })
-        })
+        }
+
+        this.input.get().data().getAll().forEach(d => calcFor(d.at.get()))
+
+        if (!this.stopAtLast.get()) calcFor(now)
+
         return this._data
     }
 }
