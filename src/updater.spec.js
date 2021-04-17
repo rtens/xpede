@@ -18,7 +18,10 @@ specify('Find due metrics', () => {
                     m.source.createManual(w => {
                         w.instructions.set('Get the number')
                     })
-                    m.facts.add().create(f => f.at.set(new Date('2011-12-13')))
+                    m.facts.add().create(f => {
+                        f.at.set(new Date('2011-12-13'))
+                        f.value.set(42)
+                    })
                 })
             })
         })
@@ -36,7 +39,11 @@ specify('Find due metrics', () => {
             type: 'Manual',
             instructions: 'Get the number',
             hint: 'Value'
-        }
+        },
+        facts: [{
+            at: new Date('2011-12-13'),
+            value: 42
+        }]
     }])
 
     metric.frequency.create(s => s.days.set(7))

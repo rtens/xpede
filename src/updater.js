@@ -57,7 +57,11 @@ function mapMetric(expedition, path, m) {
         path,
         name: m.name.get(),
         description: m.description.get(),
-        source: mapSource(m.source)
+        source: mapSource(m.source),
+        facts: m.facts.getAll().map(f => ({
+            at: f.at.get(),
+            value: f.value.get()
+        }))
     }
 }
 

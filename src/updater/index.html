@@ -13,7 +13,7 @@
 
 <body style="padding: 2em;">
     <div class="container">
-        <div class="metric-updater card" style="width: 18rem; display: none;">
+        <div class="metric-updater card" style="width: 28rem; display: none;">
             <div class="card-header">
                 <h5 class="card-title">Card Header</h5>
                 <h6 class="card-subtitle mb-2 text-muted">Card subtitle</h6>
@@ -30,6 +30,9 @@
                     <button type="submit" class="btn btn-primary">Add Fact</button>
                     <button onclick="next(); return false" class="btn btn-secondary">Skip</button>
                 </form>
+
+                <h5 class="mt-3">History</h5>
+                <div id="facts" style="max-height: 12em; overflow-y: auto;"></div>
             </div>
         </div>
 
@@ -77,6 +80,8 @@
 
             $updater.find('.card-text').html(metric.source ? marked(metric.source.instructions ? metric.source.instructions : '') : '')
             $('#value').attr('placeholder', metric.source ? metric.source.hint : 'Value')
+
+            $('#facts').html(metric.facts.reverse().map(f => f.at + ': ' + f.value).join('<br>'))
 
             $('#at').focus()
         }
