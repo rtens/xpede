@@ -1,6 +1,5 @@
-- CLI app for updating metrics
+- resize graphs
+- show opportunities
 - metrics on the dashboard
 - participants and stakeholders
 - expeditions in grid
-- expedition detail view with split-out cards
-- resize graphs

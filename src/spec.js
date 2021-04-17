@@ -7,7 +7,7 @@ function specify(name, tests) {
         tests()
         console.log('✓ ' + name)
     } catch (e) {
-        if (e.message.startsWith('Expected')) {
+        if (e.message.startsWith('Expectation failed')) {
             const line = e.stack.split('\n').find(l => l.trim().startsWith('at ') && !l.split(':')[0].endsWith('/spec.js'))
             console.error('\n❌ ' + name + '\n  ' + line.trim() + '\n\n  ' + e.message + '\n')
         } else {
@@ -18,9 +18,9 @@ function specify(name, tests) {
 
 specify.skip = name => console.log('\n> ' + name)
 
-function equal(actual, expected) {
+function equal(actual, expected, description) {
     if (JSON.stringify(actual) != JSON.stringify(expected))
-        throw new Error("Expected: " + JSON.stringify(expected) + "\n   but got: " + JSON.stringify(actual))
+        throw new Error("Expectation failed" + (description ? ": "+description : '') + "\n  Expected: " + JSON.stringify(expected) + "\n   but got: " + JSON.stringify(actual))
 }
 
 function same(object, actual, expected) {

@@ -2,13 +2,20 @@ const fs = require('fs')
 const { Loading } = require('./persistence')
 const Expedition = require('./aggregates/expedition')
 
-// Export function for testing
-if (!process.env.FILES) return module.exports = toDashboard
 
-runIt(() => readExpeditions(process.env.FILES),
-    expeditions => toDashboard(expeditions),
-    dashboard => createOutput(dashboard),
-    file => console.log('Created ' + file))
+if (require.main === module) {
+    runIt(() => readExpeditions(process.env.FILES),
+        expeditions => toDashboard(expeditions),
+        dashboard => createOutput(dashboard),
+        file => console.log('Created ' + file))
+}
+
+function readExpeditions(files) {
+    return files
+        .split('\n')
+        .map(f => require(f))
+        .map(f => Loading.fromFlat(f).inflated(new Expedition).withCaching(true))
+}
 
 function toDashboard(expeditions) {
     return {
@@ -16,6 +23,7 @@ function toDashboard(expeditions) {
         expeditions: expeditions.map(mapExpedition)
     }
 }
+module.exports = toDashboard
 
 function mapExpedition(e) {
     return {
@@ -73,13 +81,6 @@ function mapStatus(d) {
         at: d.at.get().toISOString(),
         score: d.score.get()
     }
-}
-
-function readExpeditions(files) {
-    return files
-        .split('\n')
-        .map(f => require(f))
-        .map(f => Loading.fromFlat(f).inflated(new Expedition).withCaching(true))
 }
 
 function createOutput(dashboard) {

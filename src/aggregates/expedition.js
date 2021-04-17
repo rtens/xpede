@@ -2,7 +2,7 @@ const { Value, One, Many, Map, Formula, extend } = require('../model')
 const Party = require('./party')
 
 let cache = false
-let now = new Date()
+let now = () => new Date()
 
 class Signal {
     constructor() {
@@ -54,13 +54,20 @@ class Expedition extends Signal {
         return this._status
     }
 
+    metrics() {
+        return {
+            summit: this.summit.ifEither(s => s.metrics(), () => []),
+            waypoints: this.waypoints.getAll().map(w => w.metrics())
+        }
+    }
+
     withCaching(active = true) {
         cache = active
         return this
     }
 
     withCurrentDate(date) {
-        now = date
+        now = () => date
         return this
     }
 }
@@ -94,6 +101,14 @@ class Goal extends Signal {
             && this.coordinates.getAll().reduce((acc, i) => acc && !!i.locked.get(), true)
             && this.subs.getAll().reduce((acc, i) => acc && i.isReached(), true)
     }
+
+    metrics() {
+        return {
+            coordinates: this.coordinates.getAll().map(c => c.metrics()),
+            pace: this.pace.getAll().map(p => p.metrics()),
+            subs: this.subs.getAll().map(s => s.metrics())
+        }
+    }
 }
 
 class Coordinate {
@@ -101,11 +116,19 @@ class Coordinate {
         this.locked = Value.of(Boolean)
         this.indicator = One.of(Indicator)
     }
+
+    metrics() {
+        return this.indicator.ifEither(i => i.metrics(), () => [])
+    }
 }
 
 class Indicator extends Signal {
     constructor() {
         super()
+    }
+
+    metrics() {
+        return []
     }
 }
 
@@ -139,6 +162,10 @@ class Target extends Indicator {
 
     score(value) {
         return (value.get() - this.bad.get()) / (this.good.get() - this.bad.get())
+    }
+
+    metrics() {
+        return this.metric.ifEither(m => m.metrics(), () => [])
     }
 }
 extend(Target, Indicator)
@@ -174,6 +201,10 @@ class Metric {
                 && l.get().at.get() <= end)
 
         return this._dataBetween[start + '-' + end]
+    }
+
+    metrics() {
+        return []
     }
 }
 
@@ -216,6 +247,10 @@ class Derived extends Metric {
         this.inputs.keys().forEach(k => inputs[k] = this.inputs.at(k).get())
         return inputs
     }
+
+    metrics() {
+        return this.inputs.keys().reduce((acc, k) => ({...acc, [k]: this.inputs.at(k).get().metrics()}), {})
+    }
 }
 extend(Derived, Metric)
 
@@ -249,6 +284,10 @@ class Smoothed extends Metric {
         })
 
         return this._data
+    }
+
+    metrics() {
+        return this.input.ifEither(i => i.metrics(),  () => [])
     }
 }
 extend(Smoothed, Metric)
@@ -298,9 +337,13 @@ class Averaged extends Metric {
 
         this.input.get().data().getAll().forEach(d => calcFor(d.at.get()))
 
-        if (!this.stopAtLast.get()) calcFor(now)
+        if (!this.stopAtLast.get()) calcFor(now())
 
         return this._data
+    }
+
+    metrics() {
+        return this.input.ifEither(i => i.metrics(),  () => [])
     }
 }
 extend(Averaged, Metric)
@@ -338,6 +381,10 @@ class Difference extends Metric {
         })
         return this._data
     }
+
+    metrics() {
+        return this.input.ifEither(i => i.metrics(),  () => [])
+    }
 }
 extend(Difference, Metric)
 
@@ -366,23 +413,31 @@ class Measured extends Metric {
     data() {
         return this.facts
     }
+
+    metrics() {
+        return this
+    }
+
+    isDue() {
+        if (this.data().isEmpty() || !this.frequency.exists()) return true
+        return this.data().last().get().at.get().getTime() + this.frequency.get().millis() <= now().getTime()
+    }
 }
 extend(Measured, Metric)
 
 class Source {
     constructor() {
-        this.name = Value.of(String)
     }
 }
 
-class Website extends Source {
+class Manual extends Source {
     constructor() {
         super()
-        this.url = Value.of(String)
         this.instructions = Value.of(String)
+        this.type = Value.of(String)
     }
 }
-extend(Website, Source)
+extend(Manual, Source)
 
 
 

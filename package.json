@@ -1,0 +1,19 @@
+{
+  "name": "xpede",
+  "version": "0.2.0",
+  "description": "A simple tool to help you define and track your goals.",
+  "scripts": {
+    "test": "run/test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rtens/xpede.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rtens/xpede/issues"
+  },
+  "homepage": "https://github.com/rtens/xpede#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}

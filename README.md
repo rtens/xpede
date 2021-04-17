@@ -22,6 +22,31 @@ run/test
 
 ## Usage
 
+
+### Updating due metrics
+
+To add facts to due metrics, run the following command
+
+```
+run/update
+```
+
+open http://localhost:19747 in your browser and follow the instructions.
+
+When done, stop the updater with the key combination `Ctrl + C`
+
+
+### Creating and updating the dashboard
+
+To create a new and update an existing dashboard, use the following command
+
+```
+run/dashboard
+```
+
+This will create the file `out/dashboard.html` containing all Expeditions stored in `store/expedition`.
+
+
 ### Creating and editing an Expedition
 
 To edit an Expedition named `first` use
@@ -56,13 +81,3 @@ quit()
 The expedition is now saved as `store/expedition/first.json`.
 
 To quit the editor without saving use the key combination `Ctrl + D`.
-
-### Creating and updating the dashboard
-
-To create a new and update an existing dashboard, use the following command
-
-```
-run/dashboard
-```
-
-This will create the file `out/dashboard.html` containing all Expeditions stored in `store/expedition`.

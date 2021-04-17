@@ -1,0 +1,2 @@
+#!/bin/bash
+cd src; FILES=$(find ../store/expedition -type f) node updater.js
