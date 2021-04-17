@@ -1,4 +1,5 @@
 const { Loading, Storing } = require('./persistence')
+const { updateDashboard } = require('./dashboard')
 const Expedition = require('./aggregates/expedition')
 
 class Updater {
@@ -98,9 +99,9 @@ function hintFor(type) {
         case 'DateTime':
             return 'Date and time (YYYY-MM-TT HH:MM:SS)'
         case 'Hours':
-            return 'Time (HH:MM:SS)'
+            return 'Hours (HH:MM:SS)'
         case 'Minutes':
-            return 'Time (MM:SS)'
+            return 'Minutes (MM:SS)'
         case 'Number':
             return 'Number'
         default:
@@ -130,6 +131,7 @@ class Expeditions {
 
     save(file, expedition) {
         new Storing(expedition).toFile(file)
+        updateDashboard()
     }
 }
 
@@ -149,6 +151,7 @@ if (require.main === module) {
     })
 
     app.post('/add-fact', (req, res) => {
+        console.log('Add fact', req.body.expedition, req.body.path.join('/'), req.body.at, req.body.value)
         updater.addFact(req.body)
         res.status(200).send({ success: true })
     })

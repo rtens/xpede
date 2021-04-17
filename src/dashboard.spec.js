@@ -1,12 +1,12 @@
 const { specify, assert } = require('./spec')
 const Expedition = require('./aggregates/expedition')
-const dashboard = require('./dashboard')
+const { toDashboard } = require('./dashboard')
 
 specify('Minimal Expedition', () => {
     const e = new Expedition()
     e.name.set('Foo')
 
-    assert.equal(dashboard([e]), {
+    assert.equal(toDashboard([e]), {
         weeks: 12,
         expeditions: [
             {
@@ -42,7 +42,7 @@ specify('Summit coordinates', () => {
         })
     })
 
-    assert.equal(dashboard([e]).expeditions[0].summit, {
+    assert.equal(toDashboard([e]).expeditions[0].summit, {
         "type": "Goal",
         "name": "Bar",
         "description": "Something about the bar",
@@ -75,7 +75,7 @@ specify('Summit coordinates', () => {
         "subs": []
     })
 
-    assert.equal(dashboard([e]).expeditions[0].status, [{
+    assert.equal(toDashboard([e]).expeditions[0].status, [{
         "at": "2011-12-13T14:15:16.017Z",
         "score": 0.8
     }])
@@ -100,7 +100,7 @@ specify('Summit pace', () => {
         })
     })
 
-    assert.equal(dashboard([e]).expeditions[0].summit, {
+    assert.equal(toDashboard([e]).expeditions[0].summit, {
         "type": "Goal",
         "name": "Bar",
         "description": "Something about the bar",
@@ -157,7 +157,7 @@ specify('Sub goals', () => {
         })
     })
 
-    assert.equal(dashboard([e]).expeditions[0].summit, {
+    assert.equal(toDashboard([e]).expeditions[0].summit, {
         "type": "Goal",
         "name": "Bar",
         "description": "Something about the bar",
@@ -219,7 +219,7 @@ specify('Waypoints', () => {
         })
     })
 
-    assert.equal(dashboard([e]).expeditions[0].waypoints, [{
+    assert.equal(toDashboard([e]).expeditions[0].waypoints, [{
         "type": "Goal",
         "name": "Bar",
         "description": "Something about the bar",

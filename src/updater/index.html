@@ -75,7 +75,7 @@
             $updater.find('.card-title').html(metric.name)
             $updater.find('.card-subtitle').html(metric.description)
 
-            $updater.find('.card-text').html(metric.source ? marked(metric.source.instructions) : '')
+            $updater.find('.card-text').html(metric.source ? marked(metric.source.instructions ? metric.source.instructions : '') : '')
             $('#value').attr('placeholder', metric.source ? metric.source.hint : 'Value')
 
             $('#at').focus()

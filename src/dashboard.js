@@ -2,8 +2,13 @@ const fs = require('fs')
 const { Loading } = require('./persistence')
 const Expedition = require('./aggregates/expedition')
 
+module.exports = { toDashboard, updateDashboard }
 
 if (require.main === module) {
+    updateDashboard()
+}
+
+function updateDashboard() {
     runIt(() => readExpeditions(process.env.FILES),
         expeditions => toDashboard(expeditions),
         dashboard => createOutput(dashboard),
@@ -23,7 +28,6 @@ function toDashboard(expeditions) {
         expeditions: expeditions.map(mapExpedition)
     }
 }
-module.exports = toDashboard
 
 function mapExpedition(e) {
     return {
