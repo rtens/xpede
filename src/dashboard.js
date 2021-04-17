@@ -4,15 +4,11 @@ const Expedition = require('./aggregates/expedition')
 
 module.exports = { toDashboard, updateDashboard }
 
-if (require.main === module) {
-    updateDashboard()
-}
-
 function updateDashboard() {
     runIt(() => readExpeditions(process.env.FILES),
         expeditions => toDashboard(expeditions),
         dashboard => createOutput(dashboard),
-        file => console.log('Created ' + file))
+        file => console.log('Updated ' + file))
 }
 
 function readExpeditions(files) {

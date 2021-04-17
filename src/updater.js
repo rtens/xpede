@@ -147,6 +147,7 @@ if (require.main === module) {
     const port = 19747
 
     const updater = new Updater(new Expeditions(process.env.FILES))
+    updateDashboard()
 
     app.use('/', express.static('updater'))
 
@@ -161,6 +162,11 @@ if (require.main === module) {
     })
 
     app.listen(port, () => {
-        console.log(`Open http://localhost:${port}`)
+        console.log()
+        console.log(`Open http://localhost:${port} to update due metrics`)
+        console.log('Press ENTER to exit');
+        process.stdin.once('data', function () {
+            process.exit(0)
+        });
     })
 }

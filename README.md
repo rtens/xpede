@@ -23,9 +23,9 @@ run/test
 ## Usage
 
 
-### Updating due metrics
+### Updating metrics and dashboard
 
-To add facts to due metrics, run the following command
+To update the dashboard and add facts to due metrics, run the following command
 
 ```
 run/update
@@ -33,23 +33,14 @@ run/update
 
 open http://localhost:19747 in your browser and follow the instructions.
 
-When done, stop the updater with the key combination `Ctrl + C`
+When done press the `ENTER` key.
+
+You can find the dashboard in `out/dashboard.html`.
 
 
-### Creating and updating the dashboard
+### Editing an Expedition
 
-To create a new and update an existing dashboard, use the following command
-
-```
-run/dashboard
-```
-
-This will create the file `out/dashboard.html` containing all Expeditions stored in `store/expedition`.
-
-
-### Creating and editing an Expedition
-
-To edit an Expedition named `first` use
+To create or edit an Expedition named `first` use
 
 ```
 run/edit expedition first
