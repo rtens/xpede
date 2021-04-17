@@ -1,4 +1,3 @@
-- resize graphs
 - show opportunities
 - metrics on the dashboard
 - participants and stakeholders

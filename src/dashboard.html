@@ -20,8 +20,8 @@
 
         <div class="expedition card text-white bg-dark mb-3">
             <div class="card-header">
-                <img src="../assets/icons/expedition.png" style="height: 4em; margin-right: 1em;"
-                    title="Expedition" class="icon float-start">
+                <img src="../assets/icons/expedition.png" style="height: 4em; margin-right: 1em;" title="Expedition"
+                    class="icon float-start">
                 <h1 class="name">Expedition Name</h1>
             </div>
 
@@ -48,8 +48,8 @@
 
         <div class="indicator card text-white bg-dark mt-3">
             <div class="card-header">
-                <img src="../assets/icons/summit.png" style="height: 2.5em; margin-right: .5em;"
-                    title="Summit" class="icon float-start">
+                <img src="../assets/icons/summit.png" style="height: 2.5em; margin-right: .5em;" title="Summit"
+                    class="icon float-start">
                 <h2 class="name">Summit Name</h2>
             </div>
 
@@ -86,8 +86,14 @@
 
         const then = []
         renderDashboard(dashboard)
-        then.forEach(t => t())
+        redraw()
         $('.collapse.show').removeClass('show')
+
+        $(window).on('resize', redraw)
+
+        function redraw() {
+            then.forEach(t => t())
+        }
 
         function renderDashboard(dashboard) {
             dashboard.expeditions.forEach(e =>
@@ -103,8 +109,9 @@
             writeParty($expedition.find('.participants'), expedition.participants)
 
             const $collapseTarget = $expedition.find('.collapse')[0]
-            $expedition.find('.card-header').on('click', () =>
-                new bootstrap.Collapse($collapseTarget))
+            $expedition.find('.card-header').on('click', () => {
+                new bootstrap.Collapse($collapseTarget); redraw()
+            })
 
             colorCode($expedition, expedition.status)
             const $status = $expedition.find('.status')
@@ -148,8 +155,9 @@
             $indicator.find('.description').html(indicator.description)
 
             const $collapseTarget = $indicator.find('.collapse')[0]
-            $indicator.find('.card-header').on('click', () =>
-                new bootstrap.Collapse($collapseTarget))
+            $indicator.find('.card-header').on('click', () => {
+                new bootstrap.Collapse($collapseTarget); redraw()
+            })
 
             colorCode($indicator, indicator.status)
             const $status = $indicator.find('.status')
