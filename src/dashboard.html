@@ -9,68 +9,98 @@
         integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
 
     <title>Status</title>
+
+    <style>
+        html {
+            position: relative;
+            min-height: 100%;
+        }
+
+        body {
+            margin-bottom: 60px;
+            /* Margin bottom by footer height */
+        }
+
+        .footer {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 60px;
+            /* Set the fixed height of the footer here */
+            line-height: 60px;
+            /* Vertically center the text there */
+            background-color: #f5f5f5;
+        }
+    </style>
 </head>
 
-<body style="margin: 1em; overflow: scroll;">
-    <div class="dashboard">
+<body style="overflow: scroll;">
+        <div class="container mt-3">
+            <button id="expeditionsButton" type="button" class="btn btn-primary" onclick="toggleOpportunities()">Expeditions</button>
+            <button id="opportunitiesButton" type="button" class="btn btn-light" onclick="toggleOpportunities()">Opportunities</button>
+        </div>
 
-    </div>
+        <div class="dashboard container mt-3">
 
-    <div class="prototypes">
+        </div>
 
-        <div class="expedition card text-white bg-dark mb-3">
-            <div class="card-header">
-                <img src="../assets/icons/expedition.png" style="height: 4em; margin-right: 1em;" title="Expedition"
-                    class="icon float-start">
-                <h1 class="name">Expedition Name</h1>
-            </div>
+        <div class="opportunities container mt-3"></div>
 
-            <div class="collapse show">
-                <div class="card-body">
-                    <div class="clearfix">
-                        <img src="../assets/icons/stakeholders.png" style="height: 2em; margin-right: 0.5em;"
-                            title="Stakeholders" class="icon float-start">
-                        <div class="stakeholders">Some stakeholders</div>
+        <div class="prototypes">
+
+            <div class="expedition card text-white bg-dark mb-3">
+                <div class="card-header">
+                    <img src="../assets/icons/expedition.png" style="height: 4em; margin-right: 1em;" title="Expedition"
+                        class="icon float-start">
+                    <h1 class="name">Expedition Name</h1>
+                </div>
+
+                <div class="collapse show">
+                    <div class="card-body">
+                        <div class="clearfix">
+                            <img src="../assets/icons/stakeholders.png" style="height: 2em; margin-right: 0.5em;"
+                                title="Stakeholders" class="icon float-start">
+                            <div class="stakeholders">Some stakeholders</div>
+                        </div>
+                        <div class="clearfix">
+                            <img src="../assets/icons/participants.png" style="height: 2em; margin-right: 0.5em;"
+                                title="Participants" class="icon float-start">
+                            <div class="participants">Some participants</div>
+                        </div>
+                        <div class="status">
+                            <canvas width="100" height="150"></canvas>
+                        </div>
+
+                        <div class="goals"></div>
                     </div>
-                    <div class="clearfix">
-                        <img src="../assets/icons/participants.png" style="height: 2em; margin-right: 0.5em;"
-                            title="Participants" class="icon float-start">
-                        <div class="participants">Some participants</div>
-                    </div>
-                    <div class="status">
-                        <canvas width="100" height="150"></canvas>
-                    </div>
-
-                    <div class="goals"></div>
                 </div>
             </div>
-        </div>
 
-        <div class="indicator card text-white bg-dark mt-3">
-            <div class="card-header">
-                <img src="../assets/icons/summit.png" style="height: 2.5em; margin-right: .5em;" title="Summit"
-                    class="icon float-start">
-                <h2 class="name">Summit Name</h2>
-            </div>
+            <div class="indicator card text-white bg-dark mt-3">
+                <div class="card-header">
+                    <img src="../assets/icons/summit.png" style="height: 2.5em; margin-right: .5em;" title="Summit"
+                        class="icon float-start">
+                    <h2 class="name">Summit Name</h2>
+                </div>
 
-            <div class="collapse show">
-                <div class="card-body">
-                    <p class="description">Some description</p>
-                    <div class="extra"></div>
-                    <div class="status">
-                        <canvas width="100" height="150"></canvas>
+                <div class="collapse show">
+                    <div class="card-body">
+                        <p class="description">Some description</p>
+                        <div class="extra"></div>
+                        <div class="status">
+                            <canvas width="100" height="150"></canvas>
+                        </div>
+                        <div class="children"></div>
                     </div>
-                    <div class="children"></div>
                 </div>
             </div>
-        </div>
 
-        <div class="target">
-            <h5>Good: <span class="good"></span></h5>
-            <h5>Bad: <span class="bad"></span></h5>
-        </div>
+            <div class="target">
+                <h5>Good: <span class="good"></span></h5>
+                <h5>Bad: <span class="bad"></span></h5>
+            </div>
 
-    </div>
+        </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW"
@@ -82,12 +112,14 @@
         const dashboard = /**DASHBOARD*/testDashboard()/*DASHBOARD**/
 
         const $dashboard = $('.dashboard')
+        const $opportunities = $('.opportunities')
         const $proto = $('.prototypes').remove()
 
         const then = []
         renderDashboard(dashboard)
         redraw()
         $('.collapse.show').removeClass('show')
+        $opportunities.hide()
 
         $(window).on('resize', redraw)
 
@@ -98,6 +130,16 @@
         function renderDashboard(dashboard) {
             dashboard.expeditions.forEach(e =>
                 $dashboard.append(renderExpedition(e)))
+        }
+
+        function toggleOpportunities() {
+            $('#expeditionsButton').toggleClass('btn-light btn-primary')
+            $dashboard.toggle()
+            
+            $('#opportunitiesButton').toggleClass('btn-light btn-primary')
+            $opportunities.toggle()
+
+            redraw()
         }
 
         function renderExpedition(expedition) {
@@ -117,9 +159,10 @@
             const $status = $expedition.find('.status')
             then.push(() => drawGraph($status, expedition.status))
 
+            const $goals = $expedition.find('.goals')
             expedition.waypoints.forEach(waypoint =>
-                $expedition.find('.goals').prepend(renderAny(waypoint, 'waypoint')))
-            $expedition.find('.goals').prepend(renderAny(expedition.summit, 'summit'))
+                $goals.prepend(renderAny(waypoint, 'waypoint')))
+            $goals.prepend(renderAny(expedition.summit, 'summit'))
 
             return $expedition
         }
@@ -182,7 +225,6 @@
 
         function renderCoordinate(coordinate) {
             const $coordinate = renderAny(coordinate.indicator, 'coordinate' + (coordinate.locked ? '_locked' : ''))
-            console.log(coordinate.locked, $coordinate)
             if (!coordinate.locked) {
                 $coordinate.removeClass('bg-warning')
                 $coordinate.removeClass('bg-danger')
@@ -201,7 +243,55 @@
             $extra.find('.bad').html(target.bad)
             $extra.find('.good').html(target.good)
 
+            if (role != 'coordinate' && target.status.length && target.status[target.status.length - 1].score < 1)
+                addOpportunity($target, target.status)
+
             return $target
+        }
+
+        function addOpportunity($target, status) {
+            const $opportunity = $target.clone()
+            $opportunities.append($opportunity)
+
+            const $collapseTarget = $opportunity.find('.collapse')[0]
+            $opportunity.find('.card-header').on('click', () => {
+                new bootstrap.Collapse($collapseTarget); redraw()
+            })
+
+            const $status = $opportunity.find('.status')
+            then.push(() => drawGraph($status, status))
+
+            const $head = $opportunity.find('.card-header')
+            $head.html($('<div/>').append($head.clone().html()))
+
+            let ran = false
+            then.push(() => {
+                if (ran) return
+                ran = true
+
+                $parent = $target.parent().closest('.card')
+                while ($parent.length) {
+                    insertHeader($head, $parent)
+                    $parent = $parent.parent().closest('.card')
+                }
+            })
+        }
+
+        function insertHeader($head, $parent) {
+            const $headContent = $parent.find('.card-header').first().clone()
+
+            const replace = t => $headContent.find(t).replaceWith(function () {
+                return $("<span />").append($(this).contents());
+            });
+
+            replace('h1')
+            replace('h2')
+
+            $headContent.find('img').removeClass('float-start')
+            $headContent.find('img').css('height', '1em')
+            $headContent.find('img').css('margin-right', '0')
+
+            $head.prepend('<span>' + $headContent.html() + '</span>')
         }
 
         function proto(of) {

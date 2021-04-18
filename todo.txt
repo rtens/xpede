@@ -1,4 +1,3 @@
-- show opportunities (non-good indicators)
-- metrics on the dashboard
-- participants and stakeholders
-- expeditions in grid
+- have all assets stored locally
+- include metrics on the dashboard
+- show participants and stakeholders
