@@ -436,6 +436,31 @@ class Manual extends Source {
         this.instructions = Value.of(String)
         this.type = Value.of(String)
     }
+
+    ofTypeNumber() {
+        this.type.set('Number')
+        return this
+    }
+
+    ofTypeDate() {
+        this.type.set('Date')
+        return this
+    }
+
+    ofTypeDateTime() {
+        this.type.set('DateTime')
+        return this
+    }
+
+    ofTypeHours() {
+        this.type.set('Hours')
+        return this
+    }
+
+    ofTypeMinutes() {
+        this.type.set('Minutes')
+        return this
+    }
 }
 extend(Manual, Source)
 
