@@ -8,6 +8,12 @@ To simply view the dashboard, open the file `out/dashboard.html` in a browser.
 
 To make any changes, you need to have [Node.js](https://nodejs.org/) installed.
 
+Install the dependencies with
+
+```
+npm ci
+```
+
 Make sure the application commands are executable
 
 ```
