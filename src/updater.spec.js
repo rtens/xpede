@@ -84,6 +84,23 @@ specify('Find due metrics inside metrics', () => {
     ])
 })
 
+specify('Deduplicate metrics', () => {
+    const foo = new Expedition()
+    let metric;
+    foo.summit.create(s => {
+        s.pace.add().createTarget(t => {
+            metric = t.metric.createMeasured()
+        })
+        s.pace.add().createTarget(t => t.metric.set(metric))
+    })
+
+    const updater = new Updater({ all: () => ({ foo }) })
+
+    assert.equal(updater.findDueMetrics().map(m => m.path), [
+        ['summit', 'pace', 0]
+    ])
+})
+
 specify('Add a fact', () => {
     const foo = new Expedition()
     foo.name.set('Foo')

@@ -10,11 +10,15 @@ class Updater {
     findDueMetrics() {
         const expeditions = this.expeditions.all()
 
+        const uniques = []
         const metrics = []
-        Object.keys(expeditions).map(e => {
+        Object.keys(expeditions).forEach(e => {
             flatten(expeditions[e].metrics())
                 .filter(({ metric }) => metric.isDue())
                 .forEach(({ path, metric }) => {
+                    if (uniques.indexOf(metric) + 1) return
+                    uniques.push(metric)
+                    
                     metrics.push(mapMetric(e, path, metric))
                 })
         })
