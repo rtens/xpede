@@ -14,8 +14,9 @@ function updateDashboard() {
 function readExpeditions(files) {
     return files
         .split('\n')
-        .map(f => require(f))
-        .map(f => Loading.fromFlat(f).inflated(new Expedition).withCaching(true))
+        .map(f => Loading.fromFile(f)
+            .inflated(new Expedition)
+            .withCaching(true))
 }
 
 function toDashboard(expeditions) {
