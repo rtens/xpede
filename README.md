@@ -2,7 +2,7 @@
 
 A simple tool to help you define and track your goals.
 
-To simply view the dashboard, open the file `out/dashboard.html` in a browser.
+To view the dashboard, open the file `out/dashboard.html` in a browser.
 
 ## Installation
 
