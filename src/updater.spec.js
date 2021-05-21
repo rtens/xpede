@@ -138,6 +138,32 @@ specify('Add a fact', () => {
     })
 })
 
+specify('Default time of fact', () => {
+    const foo = new Expedition()
+    let metric;
+    foo.summit.create(s => {
+        s.pace.add().createTarget(t => {
+            metric = t.metric.createMeasured()
+        })
+    })
+
+    const updater = new Updater({
+        all: () => ({ foo }),
+        save: () => null
+    }, new Date('2011-12-21'))
+
+    updater.addFact({
+        expedition: 'foo',
+        path: ['summit', 'pace', 0],
+        at: '',
+        value: 42
+    })
+
+    assert.equal(metric.facts.getAll().map(f => [f.at.get(), f.value.get()]), [
+        [new Date('2011-12-21'), 42]
+    ])
+})
+
 specify('Parse value', () => {
     test('Number', '42.3', 42.3)
     test('Number', '42,3', 42.3)

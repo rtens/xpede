@@ -3,8 +3,9 @@ const { updateDashboard } = require('./dashboard')
 const Expedition = require('./aggregates/expedition')
 
 class Updater {
-    constructor(expeditions) {
+    constructor(expeditions, now = new Date()) {
         this.expeditions = expeditions
+        this.now = now
     }
 
     findDueMetrics() {
@@ -34,7 +35,7 @@ class Updater {
         const metric = metrics[JSON.stringify(path)]
 
         metric.facts.add().create(f => {
-            f.at.set(at.length ? new Date(at) : new Date())
+            f.at.set(at.length ? new Date(at) : this.now)
             f.value.set(parseValue(metric.source, value))
         })
 
