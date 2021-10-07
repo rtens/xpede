@@ -78,7 +78,7 @@
             $updater.find('.card-title').html(metric.name)
             $updater.find('.card-subtitle').html(metric.description)
 
-            $updater.find('.card-text').html(metric.source ? marked(metric.source.instructions ? metric.source.instructions : '') : '')
+            $updater.find('.card-text').html(metric.source ? marked.parse(metric.source.instructions ? metric.source.instructions : '') : '')
             $('#value').attr('placeholder', metric.source ? metric.source.hint : 'Value')
 
             $('#facts').html(metric.facts.reverse().map(f => f.at + ': ' + f.value).join('<br>'))
