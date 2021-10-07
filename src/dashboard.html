@@ -234,8 +234,7 @@
             $extra.find('.bad').html(target.bad)
             $extra.find('.good').html(target.good)
 
-            if (role != 'coordinate')
-                addIndicator($target, target.status)
+            addIndicator($target, target.status, role != 'coordinate')
 
             if (role != 'coordinate' && target.status.length && target.status[target.status.length - 1].score < 1)
                 addOpportunity($target, target.status)
@@ -249,7 +248,7 @@
             $opportunities.append($opportunity)
         }
 
-        function addIndicator($target, status) {
+        function addIndicator($target, status, isLocked) {
             const $indicator = $target.clone()
 
             renderSingleIndicator($indicator, $target, status)
@@ -257,6 +256,13 @@
             $indicator.css('width', '30em')
             $indicator.css('display', 'inline-block')
             $indicator.css('margin-right', '1em')
+
+            if (!isLocked) {
+                $indicator.removeClass('bg-warning')
+                $indicator.removeClass('bg-danger')
+                $indicator.removeClass('bg-success')
+                $indicator.addClass('bg-secondary')
+            }
 
             $indicators.append($indicator)
         }
