@@ -15,6 +15,8 @@
         <div class="container mt-3">
             <button id="expeditionsButton" type="button" class="btn btn-primary" onclick="toggleOpportunities()">Expeditions</button>
             <button id="opportunitiesButton" type="button" class="btn btn-light" onclick="toggleOpportunities()">Opportunities</button>
+            <button type="button" class="float-end btn btn-light" onclick="showAll()">+</button>
+            <button type="button" class="float-end btn btn-light me-1" onclick="hideAll()">-</button>
         </div>
 
         <div class="dashboard container mt-3">
@@ -94,11 +96,20 @@
 
         const then = []
         renderDashboard(dashboard)
-        redraw()
-        $('.collapse.show').removeClass('show')
         $opportunities.hide()
+        hideAll()
 
         $(window).on('resize', redraw)
+
+        function showAll() {
+            $('.collapse').addClass('show')
+            redraw()
+        }
+
+        function hideAll() {
+            $('.collapse').removeClass('show')
+            redraw()
+        }
 
         function redraw() {
             then.forEach(t => t())
