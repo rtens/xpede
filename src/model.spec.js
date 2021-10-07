@@ -74,14 +74,14 @@ specify('One', () => {
         'foo')
     assert.equal(
         a(One.of(A), a =>
-            a.create() &&
-            a.ifNot(() => 'foo')),
-        undefined)
+            a.create(o => o.foo.set('bar')) &&
+            a.ifNot(() => 'foo').foo.get()),
+        'bar')
 
     assert.equal(
         a(One.of(A), a =>
             a.ifThere(o => o.foo.get())),
-        undefined)
+        null)
     assert.equal(
         a(One.of(A), a =>
             a.create(o => o.foo.set('bar')) &&

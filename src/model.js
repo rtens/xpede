@@ -20,11 +20,11 @@ class ObjectContainer extends Container {
     }
 
     ifThere(then) {
-        if (this.exists()) return then(this.object)
+        return this.ifEither(then, () => null)
     }
 
     ifNot(then) {
-        if (!this.exists()) return then()
+        return this.ifEither(x => x, then)
     }
 
     ifEither(there, not) {
