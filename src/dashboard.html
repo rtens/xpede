@@ -13,17 +13,18 @@
 
 <body style="overflow: scroll;">
         <div class="container mt-3">
-            <button id="expeditionsButton" type="button" class="btn btn-primary" onclick="toggleOpportunities()">Expeditions</button>
-            <button id="opportunitiesButton" type="button" class="btn btn-light" onclick="toggleOpportunities()">Opportunities</button>
+            <button id="expeditionsButton" type="button" class="tab-button btn btn-primary" onclick="selectTab('expeditions')">Expeditions</button>
+            <button id="indicatorsButton" type="button" class="tab-button btn btn-light" onclick="selectTab('indicators')">Indicators</button>
+            <button id="opportunitiesButton" type="button" class="tab-button btn btn-light" onclick="selectTab('opportunities')">Opportunities</button>
             <button type="button" class="float-end btn btn-light" onclick="showAll()">+</button>
             <button type="button" class="float-end btn btn-light me-1" onclick="hideAll()">-</button>
         </div>
 
-        <div class="dashboard container mt-3">
+        <div class="expeditions dashboard tab-container container mt-3"></div>
+        
+        <div class="indicators tab-container my-3 mx-3"></div>
 
-        </div>
-
-        <div class="opportunities container mt-3"></div>
+        <div class="opportunities tab-container container mt-3"></div>
 
         <div class="prototypes">
 
@@ -92,11 +93,12 @@
 
         const $dashboard = $('.dashboard')
         const $opportunities = $('.opportunities')
+        const $indicators = $('.indicators')
         const $proto = $('.prototypes').remove()
 
         const then = []
         renderDashboard(dashboard)
-        $opportunities.hide()
+        selectTab('expeditions')
         hideAll()
 
         $(window).on('resize', redraw)
@@ -120,12 +122,13 @@
                 $dashboard.append(renderExpedition(e)))
         }
 
-        function toggleOpportunities() {
-            $('#expeditionsButton').toggleClass('btn-light btn-primary')
-            $dashboard.toggle()
-            
-            $('#opportunitiesButton').toggleClass('btn-light btn-primary')
-            $opportunities.toggle()
+        function selectTab(tab) {
+            $('.tab-button').removeClass('btn-primary')
+            $('.tab-button').addClass('btn-light')
+            $('.tab-container').hide()
+
+            $('#' + tab + 'Button').toggleClass('btn-light btn-primary')
+            $('.' + tab).show()
 
             redraw()
         }
@@ -231,6 +234,9 @@
             $extra.find('.bad').html(target.bad)
             $extra.find('.good').html(target.good)
 
+            if (role != 'coordinate')
+                addIndicator($target, target.status)
+
             if (role != 'coordinate' && target.status.length && target.status[target.status.length - 1].score < 1)
                 addOpportunity($target, target.status)
 
@@ -239,17 +245,32 @@
 
         function addOpportunity($target, status) {
             const $opportunity = $target.clone()
+            renderSingleIndicator($opportunity, $target, status)
             $opportunities.append($opportunity)
+        }
 
-            const $collapseTarget = $opportunity.find('.collapse')[0]
-            $opportunity.find('.card-header').on('click', () => {
+        function addIndicator($target, status) {
+            const $indicator = $target.clone()
+
+            renderSingleIndicator($indicator, $target, status)
+
+            $indicator.css('width', '30em')
+            $indicator.css('display', 'inline-block')
+            $indicator.css('margin-right', '1em')
+
+            $indicators.append($indicator)
+        }
+
+        function renderSingleIndicator($indicator, $target, status) {
+            const $collapseTarget = $indicator.find('.collapse')[0]
+            $indicator.find('.card-header').on('click', () => {
                 new bootstrap.Collapse($collapseTarget); redraw()
             })
 
-            const $status = $opportunity.find('.status')
+            const $status = $indicator.find('.status')
             then.push(() => drawGraph($status, status))
 
-            const $head = $opportunity.find('.card-header')
+            const $head = $indicator.find('.card-header')
             $head.html($('<div/>').append($head.clone().html()))
 
             let ran = false
