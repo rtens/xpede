@@ -180,6 +180,31 @@
             }
         }
 
+        function renderSingleIndicator($indicator, $target, status, target) {
+            const $collapseTarget = $indicator.find('.collapse')[0]
+            $indicator.find('.card-header').on('click', () => {
+                new bootstrap.Collapse($collapseTarget); redraw()
+            })
+
+            const $status = $indicator.find('.status')
+            then.push(() => drawGraph($status, status, target))
+
+            const $head = $indicator.find('.card-header')
+            $head.html($('<div/>').append($head.clone().html()))
+
+            let ran = false
+            then.push(() => {
+                if (ran) return
+                ran = true
+
+                $parent = $target.parent().closest('.card')
+                while ($parent.length) {
+                    insertHeader($head, $parent)
+                    $parent = $parent.parent().closest('.card')
+                }
+            })
+        }
+
         function renderIndicator(indicator, role) {
             $indicator = proto('indicator')
 
@@ -195,7 +220,7 @@
 
             colorCode($indicator, indicator.status)
             const $status = $indicator.find('.status')
-            then.push(() => drawGraph($status, indicator.status))
+            then.push(() => drawGraph($status, indicator.status, indicator))
 
             return $indicator
         }
@@ -228,30 +253,32 @@
         function renderTarget(target, role) {
             const $target = renderIndicator(target, role)
 
-            const $extra = proto('target')
-            $target.find('.extra').first().append($extra)
+            if (!target.status.length) {
+                const $extra = proto('target');
+                $target.find('.extra').first().append($extra)
 
-            $extra.find('.bad').html(target.bad)
-            $extra.find('.good').html(target.good)
+                $extra.find('.bad').html(target.bad)
+                $extra.find('.good').html(target.good)
+            }
 
-            addIndicator($target, target.status, role != 'coordinate')
+            addIndicator($target, target.status, role != 'coordinate', target)
 
             if (role != 'coordinate' && target.status.length && target.status[target.status.length - 1].score < 1)
-                addOpportunity($target, target.status)
+                addOpportunity($target, target.status, target)
 
             return $target
         }
 
-        function addOpportunity($target, status) {
+        function addOpportunity($target, status, target) {
             const $opportunity = $target.clone()
-            renderSingleIndicator($opportunity, $target, status)
+            renderSingleIndicator($opportunity, $target, status, target)
             $opportunities.append($opportunity)
         }
 
-        function addIndicator($target, status, isLocked) {
+        function addIndicator($target, status, isLocked, target) {
             const $indicator = $target.clone()
 
-            renderSingleIndicator($indicator, $target, status)
+            renderSingleIndicator($indicator, $target, status, target)
 
             $indicator.css('width', '30em')
             $indicator.css('display', 'inline-block')
@@ -265,31 +292,6 @@
             }
 
             $indicators.append($indicator)
-        }
-
-        function renderSingleIndicator($indicator, $target, status) {
-            const $collapseTarget = $indicator.find('.collapse')[0]
-            $indicator.find('.card-header').on('click', () => {
-                new bootstrap.Collapse($collapseTarget); redraw()
-            })
-
-            const $status = $indicator.find('.status')
-            then.push(() => drawGraph($status, status))
-
-            const $head = $indicator.find('.card-header')
-            $head.html($('<div/>').append($head.clone().html()))
-
-            let ran = false
-            then.push(() => {
-                if (ran) return
-                ran = true
-
-                $parent = $target.parent().closest('.card')
-                while ($parent.length) {
-                    insertHeader($head, $parent)
-                    $parent = $parent.parent().closest('.card')
-                }
-            })
         }
 
         function insertHeader($head, $parent) {
@@ -313,10 +315,10 @@
             return $proto.find('.' + of).clone()
         }
 
-        function drawGraph($container, data) {
+        function drawGraph($container, data, target) {
             if (!data.length) return $container.remove()
 
-            const fontSize = 20
+            const fontSize = 24
             const padding = fontSize * 1.5
             const margin = 5
             const window = dashboard.weeks * 7 * 24 * 3600 * 1000
@@ -324,14 +326,14 @@
             const $canvas = $container.find('canvas')
             const ctx = $canvas[0].getContext("2d");
 
-            const width = $container.width() - margin
+            let width = $container.width() - margin
             const height = $canvas.prop('height')
             $canvas.prop('width', width + margin)
 
             ctx.strokeStyle = "white";
             ctx.fillStyle = "white"
             ctx.font = fontSize + "px Arial"
-            ctx.textAlign = "right"
+            ctx.textAlign = "left"
 
             const now = new Date()
             const start = new Date(now.getTime() - window)
@@ -340,11 +342,20 @@
             const max = inWindow.reduce((acc, s) => Math.max(acc, s), 1)
             const min = inWindow.reduce((acc, s) => Math.min(acc, s), 0)
 
-            const dx = width / (now - start)
             const dy = (height - padding * 2) / (max - min)
-
-            const x = date => (date - start) * dx
             const y = score => height - padding - (score - min) * dy
+
+            if (target) {
+                const textWidth = 10 + Math.max(
+                    ctx.measureText(target.good).width,
+                    ctx.measureText(target.bad).width)
+                width -= textWidth
+                ctx.fillText(target.good, width+5, y(1));
+                ctx.fillText(target.bad, width+5, y(0)+fontSize-4);
+            }
+
+            const dx = width / (now - start)
+            const x = date => (date - start) * dx
 
             ctx.lineWidth = 9
             ctx.beginPath()
@@ -474,17 +485,18 @@
                     description: 'I have reached ' + name,
                     good: Math.round(Math.random() * 21 + 12),
                     bad: Math.round(Math.random() * 12),
-                    status: testStatus(),
+                    status: Math.random() > .1 ? testStatus() : [],
                     metric: testMetric()
                 }
             }
 
             function testStatus() {
+                const max = Math.random() * 40
                 const status = []
                 for (let daysAgo = Math.random() * 7; daysAgo < Math.random() * weeks * 14 + 14; daysAgo += Math.random() * 4 + 3) {
                     status.unshift({
                         at: new Date(new Date().getTime() - daysAgo * 24 * 3600 * 1000),
-                        score: Math.random() * 4 - 1
+                        score: Math.random() * max - max/2
                     })
                 }
                 return status
