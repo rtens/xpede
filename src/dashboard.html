@@ -220,7 +220,7 @@
 
             colorCode($indicator, indicator.status)
             const $status = $indicator.find('.status')
-            then.push(() => drawGraph($status, indicator.status, indicator))
+            then.push(() => drawGraph($status, indicator.status, indicator.hasOwnProperty('good') ? indicator : null))
 
             return $indicator
         }
